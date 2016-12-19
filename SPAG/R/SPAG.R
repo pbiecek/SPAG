@@ -8,6 +8,9 @@
 #' @param categInd - number of the column in companiesDF information about the category of the company
 #' @param shp - SpatialPolygonsDataFrame object obtained via loading a shapefile
 #'
+#' @importFrom graphics plot
+#' @importFrom stats dist
+#'
 #' @export
 
 
