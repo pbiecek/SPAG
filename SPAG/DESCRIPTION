@@ -2,7 +2,8 @@ Package: SPAG
 Title: Indexes of spatial agglomeration
 Version: 0.1
 Authors@R: person("Maksymilian", "Mazur", email = "mazurmaksymilian@gmail.com", role = c("aut", "cre"))
-Description: Indexes of spatial agglomeration
+Description: Indexes of spatial agglomeration. 
+  MMA: NOTE: that this field should be longer!!!
 Depends:
     R (>= 3.0.0)
 License: GPL-3
@@ -10,6 +11,7 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     rgeos,
+    sp,
     rgdal,
     maptools
 RoxygenNote: 5.0.1
