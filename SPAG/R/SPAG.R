@@ -10,6 +10,8 @@
 #'
 #' @importFrom graphics plot
 #'
+#' @importFrom stats dist
+#' 
 #' @import maptools
 #' @import rgdal
 #' @import sp

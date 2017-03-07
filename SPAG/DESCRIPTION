@@ -2,7 +2,7 @@ Package: SPAG
 Title: Indexes of spatial agglomeration
 Version: 0.1
 Authors@R: person("Maksymilian", "Mazur", email = "mazurmaksymilian@gmail.com", role = c("aut", "cre"))
-Description: Package implementing indexes of spatial agglomeration
+Description: Package implementing indexes of spatial agglomeration. Current version calculates the Coverage, Distance and Overlap Index for a given area. The package also enables visualising the index.
 Depends:
     R (>= 3.0.0)
 License: GPL-3
