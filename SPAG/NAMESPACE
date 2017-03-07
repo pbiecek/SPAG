@@ -3,3 +3,13 @@
 export(SPAG)
 export(print.SPAG)
 export(plot.SPAG)
+
+import(maptools)
+import(rgdal)
+import(rgeos)
+import(sp)
+import(ggplot2)
+import(ggmap)
+ 
+importFrom(graphics,plot)
+importFrom(stats,dist)

@@ -8,6 +8,15 @@
 #' @param empInd - number of the column in companiesDF with numeric data regarding the employment
 #' @param categInd - number of the column in companiesDF information about the category of the company
 #'
+#' @importFrom graphics plot
+#'
+#' @import maptools
+#' @import rgdal
+#' @import sp
+#' @import rgeos
+#' @import ggplot2
+#' @import ggmap
+#'
 #' @examples 
 #' data(CompaniesPoland)
 #' data(ShapefilePoland)
