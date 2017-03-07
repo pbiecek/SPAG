@@ -7,18 +7,13 @@
 #' @param yInd - number of the column in companiesDF with information regarding the longitude
 #' @param empInd - number of the column in companiesDF with numeric data regarding the employment
 #' @param categInd - number of the column in companiesDF information about the category of the company
-#'
-#' @importFrom graphics plot
-#'
-#' @importFrom stats dist
 #' 
+#' @importFrom graphics plot
+#' @importFrom stats dist
 #' @import maptools
 #' @import rgdal
-#' @import sp
 #' @import rgeos
-#' @import ggplot2
-#' @import ggmap
-#'
+#' 
 #' @examples 
 #' data(CompaniesPoland)
 #' data(ShapefilePoland)
@@ -68,7 +63,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   
   region<-spTransform(shp, CRS(newCoordinateSystem))
 
-  area <- gArea(region)
+  area <- rgeos::gArea(region)
 
   rBase <- sapply(categories,
                       function(x){
@@ -135,7 +130,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   names(CategoryArea) <- categories
   CategoryArea$total <- gUnaryUnion(circles)
 
-  unionArea <- unionSpatialPolygons(circles,rep(1,nrow(companiesDF)))
+  unionArea <- maptools::unionSpatialPolygons(circles,rep(1,nrow(companiesDF)))
   IOverTotal <- gArea(unionArea)/gArea(circles)
 
 
