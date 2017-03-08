@@ -35,4 +35,3 @@ plot(spagIndex, "B")
 plot(spagIndex, "C")
 
 }
-

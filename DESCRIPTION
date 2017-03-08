@@ -4,11 +4,6 @@ Version: 0.1
 Authors@R: person("Maksymilian", "Mazur", email = "mazurmaksymilian@gmail.com", role = c("aut", "cre"))
 Description: Package implementing indexes of spatial agglomeration. Current version calculates the Coverage, Distance and Overlap Index for a given area. The package also enables visualising the index.
 Depends:
-    R (>= 3.0.0)
-License: GPL-3
-Encoding: UTF-8
-LazyData: true
-Depends:
     rgeos,
     sp,
     rgdal,
@@ -16,4 +11,7 @@ Depends:
     rgdal,
 	ggmap,
 	ggplot2
-RoxygenNote: 5.0.1
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1

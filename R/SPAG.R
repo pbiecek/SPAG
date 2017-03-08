@@ -7,14 +7,14 @@
 #' @param yInd - number of the column in companiesDF with information regarding the longitude
 #' @param empInd - number of the column in companiesDF with numeric data regarding the employment
 #' @param categInd - number of the column in companiesDF information about the category of the company
-#' 
+#'
 #' @importFrom graphics plot
 #' @importFrom stats dist
 #' @import maptools
 #' @import rgdal
 #' @import rgeos
-#' 
-#' @examples 
+#'
+#' @examples
 #' data(CompaniesPoland)
 #' data(ShapefilePoland)
 #' spagIndex <- SPAG(CompaniesPoland,ShapefilePoland)
@@ -24,14 +24,14 @@
 #' plot(spagIndex, "A")
 #' plot(spagIndex, "B")
 #' plot(spagIndex, "C")
-#' 
+#'
 #' @export
 
 SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
 
   currentWarning <- getOption("warn")
   options(warn = -1)
-  
+
   # Possibly fix this handle
   # TODO: Which Transform to use?
   if(is.projected(shp) %in% c(NA, FALSE)){
@@ -41,13 +41,13 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   }
 
   # TODO: In general - add some conditions on the shapefile - Coordinate System etc.
-  # TODO: handle not empty shapefile 
+  # TODO: handle not empty shapefile
   categories <- unique(companiesDF[,categInd])
   vectorOfEmployment <- companiesDF[,empInd]
   totalEmployment <- sum(vectorOfEmployment)
 
   # Calculating the coverage part of SPAG index:
-  
+
   ICov <- sapply(categories,
                       function(x){
                         return (sum(companiesDF[companiesDF[,categInd]==x,empInd])/totalEmployment)
@@ -56,11 +56,11 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   # Calculating base radius for other indexes
   # In order to do so I change the CRS to a system in which the area is not showed in degrees
   # as circles in those coordinates are oblate ellipses.
-  
+
   newCoordinateSystem<-"+init=epsg:3347"
   # CRS in degrees
   newCoordinateSystem<-"+proj=longlat +datum=WGS84"
-  
+
   region<-spTransform(shp, CRS(newCoordinateSystem))
 
   area <- rgeos::gArea(region)
@@ -82,12 +82,12 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   radiusVectorTotal <-sqrt(companiesDF[,empInd])*rBaseTotal
 
   vectorOfRadius <- sqrt(companiesDF[,empInd])*baseRadiusVector
-  
+
   # Currently I assume the points in the data frame are traditional coordinates:
   xySP <- SpatialPoints(companiesDF[,c(xInd,yInd)], proj4string=CRS("+proj=longlat +datum=WGS84"))
   # Transforming the coordinates to be in the same system as the shapefile
   xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
-  
+
   # New circles will appear as circluar in plot
   circles <-gBuffer(xySP2, quadsegs=150, byid=TRUE, width=vectorOfRadius)
 
@@ -121,12 +121,12 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
                           unionArea <- gUnaryUnion(circles[companiesDF[,categInd]==x])
                           unionArea
                         })
-  
+
   CategoryArea$proj4string = CRS("+proj=longlat +datum=WGS84")
 
   # wont work when name total is in a category
   # redundant code - clean it up
-  
+
   names(CategoryArea) <- categories
   CategoryArea$total <- gUnaryUnion(circles)
 
@@ -141,7 +141,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
 
   names(IndexTotal) <- c("categories","IDist","IOver","ICov","ISPAG")
   IndexDF <- rbind(IndexDF,IndexTotal)
-  
+
   companyList <- list(companies = CompaniesPoland, xInd = xInd, yInd=yInd, empInd = empInd, categInd = categInd)
 
   x <- list( map = region , unionAreaList = CategoryArea, companiesList = companyList, SPAGIndex = IndexDF)
@@ -151,29 +151,30 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   return(x);
 }
 
-
+#' @export
 plot.SPAG = function(x, category="total", addCompanies=TRUE){
 
   mapDF <- fortify(x$map)
   unionArea <- fortify(x$unionAreaList[[category]])
-  
+
   if(category=="total"){
     companies <- x$companiesList$companies
   } else {
     companies <- x$companiesList$companies[x$companiesList$companies[,x$companiesList$categInd]==category,]
   }
-  
+
   mapPlot <- ggplot() +
              geom_polygon(data=unionArea, aes(long, lat, group=group), colour='red', fill=NA) +
              geom_polygon(data=mapDF, aes(long, lat, group=group), colour='#808080', fill=NA) +
              theme_bw() +
              labs(x="longitude", y="latitude")
-  
+
 if(addCompanies){mapPlot <- mapPlot + geom_point(data=companies[,c(x$companiesList$xInd,x$companiesList$yInd)], aes(x,y),size=0.4)}
   mapPlot
-  
+
 }
 
-print.SPAG = function(x){
+#' @export
+print.SPAG = function(x, ...){
   print(x$SPAGIndex)
 }
