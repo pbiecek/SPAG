@@ -3,6 +3,7 @@ Indexes of spatial agglomeration
 
 
 Install from GitHub
+
 ```
-devtools::install_github("pbiecek/SPAG/SPAG")
+devtools::install_github("pbiecek/SPAG")
 ```
