@@ -26,12 +26,13 @@ Function calculating the coverage, distance and overlap components of the SPAG I
 \examples{
 data(CompaniesPoland)
 data(ShapefilePoland)
-spagIndex <- SPAG(CompaniesPoland,ShapefilePoland)
+spagIndex <- SPAG(CompaniesPoland,shp = ShapefilePoland)
 print(spagIndex)
 plot(spagIndex)
-plot(spagIndex, addCompanies=FALSE)
-plot(spagIndex, "A")
-plot(spagIndex, "B")
-plot(spagIndex, "C")
+plot(spagIndex, addCompanies = FALSE)
+plot(spagIndex, category = "A")
+plot(spagIndex, category = "A") + coord_map("orthographic")
+plot(spagIndex, category = "B")
+plot(spagIndex, category = "C")
 
 }

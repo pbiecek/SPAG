@@ -17,13 +17,14 @@
 #' @examples
 #' data(CompaniesPoland)
 #' data(ShapefilePoland)
-#' spagIndex <- SPAG(CompaniesPoland,ShapefilePoland)
+#' spagIndex <- SPAG(CompaniesPoland,shp = ShapefilePoland)
 #' print(spagIndex)
 #' plot(spagIndex)
-#' plot(spagIndex, addCompanies=FALSE)
-#' plot(spagIndex, "A")
-#' plot(spagIndex, "B")
-#' plot(spagIndex, "C")
+#' plot(spagIndex, addCompanies = FALSE)
+#' plot(spagIndex, category = "A")
+#' plot(spagIndex, category = "A") + coord_map("orthographic")
+#' plot(spagIndex, category = "B")
+#' plot(spagIndex, category = "C")
 #'
 #' @export
 
@@ -169,7 +170,11 @@ plot.SPAG = function(x, category="total", addCompanies=TRUE){
              theme_bw() +
              labs(x="longitude", y="latitude")
 
-if(addCompanies){mapPlot <- mapPlot + geom_point(data=companies[,c(x$companiesList$xInd,x$companiesList$yInd)], aes(x,y),size=0.4)}
+if(addCompanies){
+  mapPlot <- mapPlot +
+    geom_point(data=companies[,c(x$companiesList$xInd,x$companiesList$yInd)], aes(x,y),size=0.4)+
+    coord_map()
+  }
   mapPlot
 
 }
