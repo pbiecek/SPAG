@@ -1,6 +1,7 @@
 
 ---
 title: "R tool for measuring economic activity"
+author: "Maksymilian Mazur"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{SPAG_tutorial}
@@ -14,48 +15,53 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This package provides method to calculate and visualize the Index of Spatial Agglomeration (SPAG).
 
-## Installation.
+## Installation
 
-The package is still in development phase and can be downloaded from GitHUB:
+The package is still in development phase and can be downloaded and installed from GitHub:
 
 ```{r eval=FALSE}
 devtools::install_github("pbiecek/SPAG")
-library(SPAG)
 ```
 
-## Data sets.
+Use the `library()` function to load the package.
+
+```{r, warning=FALSE, message=FALSE}
+library("SPAG")
+```
+
+## Data sets
 
 In order to calculate hte SPAG Inex two arguments have to be provided - information about the area and companies for which the index is supposed to be calculated. The area should be provided as a SpatialPolygonsDataFrame. An exemplary map in the format of a SpatialPolygonsDataFrame is provided with the package:
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 ?ShapefilePoland
 ShapefilePoland
 ```
 
 The information about the companies should be provided in the form of a data frame with four columns: the geographical coordinates of the companies (numeric), the number of people working for the company (numeric) and a categorical value for the defining the field of work of the company. A data frame with such data is provided in the package:
 
-```{r eval=FALSE}
-?CompaniesPoland
-CompaniesPoland
+```{r}
+#?CompaniesPoland
+head(CompaniesPoland)
 ```
 
-## Calculating the index.
+## Calculating the index
 
 The package implements function SPAG responsible for calculating the index along with its components. The function takes 2 main parameters - the data frame with companies and spatial data frame with the area, and four parameters responsible for setting the order of data in the data frame with companies.
 
-```{r eval=FALSE}
-?SPAG
+```{r, message=FALSE, warning=FALSE}
+# ?SPAG
 SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland)
 print(SPAGIndex)
 ```
 
 The SPAG function returns an object of SPAG class consisting of a dataframe containing SPAG index and its components calculated for every category as well as the data required for visualizing the index.
 
-## Plotting the Index.
+## Plotting the Index
 
 The plot function implemented for SPAG objects uses ggplot2 and ggmap packages. The function returns an object of class ggplot which can be further modified using functionalities from the mentioned packages:
 
-```{r eval=FALSE}
+```{r, warning=FALSE, message=FALSE}
 ggSPAG <- plot(SPAGIndex)
 ggSPAG
 ```
