@@ -4,7 +4,10 @@
 \name{ShapefilePoland}
 \alias{ShapefilePoland}
 \title{Exemplary map for calculating an Index of Spatial agglomeration}
-\format{ShapefilePoland is a \code{SpatialPolygonsDataFrame} object representing a map of Poland.}
+\format{\code{ShapefilePoland} is a \code{SpatialPolygonsDataFrame} object representing a map of Poland.}
+\source{
+\href{http://www.codgik.gov.pl/}{\code{Centralny Osrodek Dokumentacji Geodezyjnej i Kartograficznej}}
+}
 \usage{
 ShapefilePoland
 }
