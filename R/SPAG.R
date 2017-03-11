@@ -13,6 +13,9 @@
 #' @import maptools
 #' @import rgdal
 #' @import rgeos
+#' @import ggmap
+#' @import ggplot2
+#' @import sp
 #'
 #' @examples
 #' data(CompaniesPoland)
