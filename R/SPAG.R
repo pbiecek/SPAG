@@ -3,8 +3,8 @@
 #' @param companiesDF - data frame with information regarding the companies. At least four columns are required:
 #' x and y coordinates of the company, the category of company and a numeric
 #' @param shp - SpatialPolygonsDataFrame object obtained via loading a shapefile
-#' @param xInd - number of the column in companiesDF with information regarding the latitude
-#' @param yInd - number of the column in companiesDF with information regarding the longitude
+#' @param longInd - number of the column in companiesDF with information regarding the latitude
+#' @param latInd - number of the column in companiesDF with information regarding the longitude
 #' @param empInd - number of the column in companiesDF with numeric data regarding the employment
 #' @param categInd - number of the column in companiesDF information about the category of the company
 #'
@@ -28,7 +28,7 @@
 #'
 #' @export
 
-SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
+SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd = 4){
 
   currentWarning <- getOption("warn")
   options(warn = -1)
@@ -85,7 +85,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   vectorOfRadius <- sqrt(companiesDF[,empInd])*baseRadiusVector
 
   # Currently I assume the points in the data frame are traditional coordinates:
-  xySP <- SpatialPoints(companiesDF[,c(xInd,yInd)], proj4string=CRS("+proj=longlat +datum=WGS84"))
+  xySP <- SpatialPoints(companiesDF[,c(longInd,latInd)], proj4string=CRS("+proj=longlat +datum=WGS84"))
   # Transforming the coordinates to be in the same system as the shapefile
   xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
 
@@ -98,7 +98,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
              theoreticalCompanies <- spsample(region, nrow(companiesDF[companiesDF[,categInd]==x,]), type="regular")
              theoreticalDF <- as.data.frame(theoreticalCompanies)
              theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
-             meanDist <- mean(dist(as.matrix(companiesDF[companiesDF[,categInd]==x,c(xInd,yInd)])))/mean(theoreticalDist)
+             meanDist <- mean(dist(as.matrix(companiesDF[companiesDF[,categInd]==x,c(longInd,latInd)])))/mean(theoreticalDist)
              if (is.finite(meanDist)){
                return(meanDist)
              } else return(0)
@@ -107,7 +107,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   theoreticalCompanies <- spsample(region, nrow(companiesDF), type="regular")
   theoreticalDF <- as.data.frame(theoreticalCompanies)
   theoreticalDist <-dist(as.matrix(theoreticalCompanies@coords))
-  IDistTotal <-  mean(dist(as.matrix(companiesDF[c(xInd,yInd)])))/mean(theoreticalDist)
+  IDistTotal <-  mean(dist(as.matrix(companiesDF[c(longInd,latInd)])))/mean(theoreticalDist)
 
   #Overlap Index
 
@@ -143,7 +143,7 @@ SPAG <- function(companiesDF, shp, xInd = 1, yInd=2, empInd = 3, categInd = 4){
   names(IndexTotal) <- c("categories","IDist","IOver","ICov","ISPAG")
   IndexDF <- rbind(IndexDF,IndexTotal)
 
-  companyList <- list(companies = CompaniesPoland, xInd = xInd, yInd=yInd, empInd = empInd, categInd = categInd)
+  companyList <- list(companies = CompaniesPoland, longInd = longInd, latInd=latInd, empInd = empInd, categInd = categInd)
 
   x <- list( map = region , unionAreaList = CategoryArea, companiesList = companyList, SPAGIndex = IndexDF)
   class(x) <- "SPAG"
@@ -168,11 +168,11 @@ plot.SPAG = function(x, category="total", addCompanies=TRUE){
              geom_polygon(data=unionArea, aes(long, lat, group=group), colour='red', fill=NA) +
              geom_polygon(data=mapDF, aes(long, lat, group=group), colour='#808080', fill=NA) +
              theme_bw() +
-             labs(x="longitude", y="latitude")
+             labs(long="longitude", lat="latitude")
 
 if(addCompanies){
   mapPlot <- mapPlot +
-    geom_point(data=companies[,c(x$companiesList$xInd,x$companiesList$yInd)], aes(x,y),size=0.4)+
+    geom_point(data=companies[,c(x$companiesList$longInd,x$companiesList$latInd)], aes(long,lat),size=0.4)+
     coord_map()
   }
   mapPlot

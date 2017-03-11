@@ -8,7 +8,7 @@
 #' @keywords datasets
 #' @name CompaniesPoland
 #' @usage CompaniesPoland
-#' @format \code{CompaniesPoland} is a data frame with 13 rows (companies) and 4 columns (company parameters) named \code{lon}
+#' @format \code{CompaniesPoland} is a data frame with 13 rows (companies) and 4 columns (company parameters) named \code{long}
 #'  and \code{lat} (geographic longitude and latitude of the company), \code{emp} (employment) and \code{category}.
 #'
 #'

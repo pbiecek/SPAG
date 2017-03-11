@@ -5,6 +5,8 @@ Authors@R: person("Maksymilian", "Mazur", email = "mazurmaksymilian@gmail.com", 
 Description: Package implementing indexes of spatial agglomeration. Current
     version calculates the Coverage, Distance and Overlap Index for a given area.
     The package also enables visualising the index.
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
 Depends:
     rgeos,
     sp,
