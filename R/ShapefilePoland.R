@@ -1,6 +1,6 @@
 #' Exemplary map for calculating an Index of Spatial agglomeration
 #'
-#' This object is a SpatialPolygonsDataFrame obtained via using readOGR function from rgdal package on a shapefile.
+#' This object is a \code{SpatialPolygonsDataFrame} obtained via using \code{readOGR} function from rgdal package on a shapefile.
 #' The data frame represents a map of Poland divided into voivodeships.
 #' 
 #' @docType data
@@ -8,7 +8,7 @@
 #' @name ShapefilePoland
 #' @usage ShapefilePoland
 #' 
-#' @format ShapefilePoland is a SpatialPolygonsDataFrame object representing a map of Poland.
+#' @format \code{ShapefilePoland} is a \code{SpatialPolygonsDataFrame} object representing a map of Poland.
 #'
 #' @seealso \code{\link{SpatialPolygonsDataFrame}}
 #'
