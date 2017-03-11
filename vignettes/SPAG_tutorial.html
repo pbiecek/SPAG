@@ -11,8 +11,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
+<meta name="date" content="2017-03-11" />
 
-<title>R tool for measuring economic activity</title>
+<title>SPAG package tutorial (vignette)</title>
 
 
 
@@ -66,14 +67,27 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">R tool for measuring economic activity</h1>
+<h1 class="title toc-ignore">SPAG package tutorial (vignette)</h1>
+<h4 class="date"><em>2017-03-11</em></h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#r-tool-for-measuring-economic-activity">R tool for measuring economic activity</a><ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#data-sets">Data sets</a></li>
+<li><a href="#calculating-the-index">Calculating the index</a></li>
+<li><a href="#plotting-the-index">Plotting the Index</a></li>
+</ul></li>
+</ul>
+</div>
 
+<div id="r-tool-for-measuring-economic-activity" class="section level1">
+<h1>R tool for measuring economic activity</h1>
 <p>This package provides a method to calculate and visualize the Index of Spatial Agglomeration (SPAG).</p>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
-<p>The package is still in development phase and can be downloaded from GitHUB:</p>
+<p>The package is still in development phase and can be downloaded from GitHub:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">install_github</span>(<span class="st">&quot;pbiecek/SPAG&quot;</span>)
 <span class="kw">library</span>(SPAG)</code></pre></div>
 </div>
@@ -96,15 +110,16 @@ SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class
 </div>
 <div id="plotting-the-index" class="section level2">
 <h2>Plotting the Index</h2>
-<p>The plot function implemented for SPAG objects uses ggplot2 and ggmap packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:</p>
+<p>The plot function implemented for SPAG objects uses <code>ggplot2</code> and <code>ggmap</code> packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ggSPAG &lt;-<span class="st"> </span><span class="kw">plot</span>(SPAGIndex)
 ggSPAG</code></pre></div>
 <p>This can be modified by setting the category parameter to match the category for which we want to plot the SPAG Index:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(SPAGIndex, <span class="dt">category=</span><span class="st">&quot;A&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(SPAGIndex, <span class="dt">cateKgory=</span><span class="st">&quot;A&quot;</span>)
 <span class="kw">plot</span>(SPAGIndex, <span class="dt">category=</span><span class="st">&quot;A&quot;</span>, <span class="dt">addCompanies =</span> <span class="ot">FALSE</span>)</code></pre></div>
-<p>By default the plotted map uses mercator projection but it can be changed by using the coord_map() function from package ggplot2:</p>
+<p>By default the plotted map uses mercator projection but it can be changed by using the <code>coord_map()</code> function from package ggplot2:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ggSPAG +<span class="st"> </span><span class="kw">coord_map</span>(<span class="st">&quot;ortho&quot;</span>, <span class="dt">orientation =</span> <span class="kw">c</span>(-<span class="dv">10</span>, <span class="dv">5</span>, <span class="dv">0</span>))
 ggSPAG +<span class="st"> </span><span class="kw">coord_map</span>(<span class="st">&quot;conic&quot;</span>, <span class="dt">lat=</span><span class="dv">20</span>) +<span class="st"> </span><span class="kw">coord_flip</span>()</code></pre></div>
+</div>
 </div>
 
 

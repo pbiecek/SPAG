@@ -1,12 +1,19 @@
 
 ---
-title: "R tool for measuring economic activity"
-output: rmarkdown::html_vignette
+title: "SPAG package tutorial (vignette)"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
 vignette: >
-  %\VignetteIndexEntry{SPAG_tutorial}
+  %\VignetteIndexEntry{SPAG tutorial}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{Cairo}
+  %\VignetteEncoding{UTF-8}
   \usepackage[utf8]{inputenc}
 ---
+
+# R tool for measuring economic activity
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -16,7 +23,7 @@ This package provides a method to calculate and visualize the Index of Spatial A
 
 ## Installation
 
-The package is still in development phase and can be downloaded from GitHUB:
+The package is still in development phase and can be downloaded from GitHub:
 
 ```{r eval=FALSE}
 devtools::install_github("pbiecek/SPAG")
@@ -53,7 +60,7 @@ The SPAG function returns an SPAG object: a dataframe containing SPAG index and 
 
 ## Plotting the Index
 
-The plot function implemented for SPAG objects uses ggplot2 and ggmap packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:
+The plot function implemented for SPAG objects uses `ggplot2` and `ggmap` packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:
 
 ```{r eval=FALSE}
 ggSPAG <- plot(SPAGIndex)
@@ -67,7 +74,7 @@ plot(SPAGIndex, category="A")
 plot(SPAGIndex, category="A", addCompanies = FALSE)
 ```
 
-By default the plotted map uses mercator projection but it can be changed by using the coord_map() function from package ggplot2:
+By default the plotted map uses mercator projection but it can be changed by using the `coord_map()` function from package ggplot2:
 
 ```{r eval=FALSE}
 ggSPAG + coord_map("ortho", orientation = c(-10, 5, 0))
