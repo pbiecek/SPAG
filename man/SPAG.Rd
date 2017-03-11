@@ -37,4 +37,3 @@ plot(spagIndex, category = "B")
 plot(spagIndex, category = "C")
 
 }
-
