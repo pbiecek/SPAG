@@ -23,11 +23,16 @@ This package provides a method to calculate and visualize the Index of Spatial A
 
 ## Installation
 
-The package is still in development phase and can be downloaded from GitHub:
+The package is still in development phase and can be downloaded and installed from GitHub:
 
 ```{r eval=FALSE}
 devtools::install_github("pbiecek/SPAG")
-library(SPAG)
+```
+
+Use the `library()` function to load the package.
+
+```{r, warning=FALSE, message=FALSE}
+library("SPAG")
 ```
 
 ## Data sets
@@ -41,8 +46,8 @@ ShapefilePoland
 
 The information about the companies should be provided in the form of a data frame with four columns: the geographical coordinates of the companies (longitude and latitute), the number of people working for the company (numeric) and a categorical value defining the field of work of the company. A data frame with such data is provided in the package:
 
-```{r eval=FALSE}
-?CompaniesPoland
+```{r}
+# ?CompaniesPoland
 CompaniesPoland
 ```
 
@@ -50,8 +55,8 @@ CompaniesPoland
 
 The package implements function SPAG responsible for calculating the index along with its components. The function takes 2 main parameters - the data frame with companies and spatial data frame with the map and four parameters responsible for setting the order of data in the data frame with companies.
 
-```{r eval=FALSE}
-?SPAG
+```{r, message=FALSE, warning=FALSE}
+# ?SPAG
 SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland)
 print(SPAGIndex)
 ```
@@ -62,21 +67,21 @@ The SPAG function returns an SPAG object: a dataframe containing SPAG index and 
 
 The plot function implemented for SPAG objects uses `ggplot2` and `ggmap` packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:
 
-```{r eval=FALSE}
+```{r}
 ggSPAG <- plot(SPAGIndex)
 ggSPAG
 ```
 
 This can be modified by setting the category parameter to match the category for which we want to plot the SPAG Index:
 
-```{r eval=FALSE}
+```{r}
 plot(SPAGIndex, category="A")
 plot(SPAGIndex, category="A", addCompanies = FALSE)
 ```
 
 By default the plotted map uses mercator projection but it can be changed by using the `coord_map()` function from package ggplot2:
 
-```{r eval=FALSE}
+```{r}
 ggSPAG + coord_map("ortho", orientation = c(-10, 5, 0))
 ggSPAG + coord_map("conic", lat=20) + coord_flip()
 ```
