@@ -176,7 +176,6 @@ if(addCompanies){
     coord_map()
   }
   mapPlot
-
 }
 
 #' @export
