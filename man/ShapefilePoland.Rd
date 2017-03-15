@@ -19,3 +19,4 @@ The data frame represents a map of Poland divided into voivodeships.
 \code{\link{SpatialPolygonsDataFrame}}
 }
 \keyword{datasets}
+

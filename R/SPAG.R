@@ -28,131 +28,129 @@
 #' plot(spagIndex, category = "A") + coord_map("orthographic")
 #' plot(spagIndex, category = "B")
 #' plot(spagIndex, category = "C")
-#'
 #' @export
 
 SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd = 4){
-
+  
   currentWarning <- getOption("warn")
   options(warn = -1)
-
-  # Possibly fix this handle
-  # TODO: Which Transform to use?
-  if(is.projected(shp) %in% c(NA, FALSE)){
-    stop("The shapefile has no projection")
-  } else{
-    shp <-spTransform(shp, CRS("+proj=tmerc +lat_0=0 +lon_0=18.99999999999998 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +towgs84=0,0,0 +units=m +no_defs"))
-  }
-
-  # TODO: In general - add some conditions on the shapefile - Coordinate System etc.
-  # TODO: handle not empty shapefile
-  categories <- unique(companiesDF[,categInd])
-  vectorOfEmployment <- companiesDF[,empInd]
-  totalEmployment <- sum(vectorOfEmployment)
-
+  
+  newCoordinateSystem<-"+init=epsg:3347" # In this coordinates a circle looks like a circle
+  newCoordinateSystem<-"+proj=longlat +datum=WGS84" # CRS in degrees
+  
+  region<-spTransform(shp, CRS(newCoordinateSystem))
+  
   # Calculating the coverage part of SPAG index:
+  categories <- unique(companiesDF[,categInd])
+  
+  
+  circles <-calcCircles(region,companiesDF,categories)
+  
+  # Most intensive part - calculating the union for categories and total
+  CirclesUnionCategory <- lapply(categories,
+                                 function(x){
+                                   unionArea <- gUnaryUnion(circles[companiesDF[,categInd]==x])
+                                   unionArea
+                                 })
+  CirclesUnionTotal <- gUnaryUnion(circles)
+  
+  CirclesUnionCategoryArea <- lapply(CirclesUnionCategory, function(x){
+    gArea(x)
+  })
+  CirclesUnionTotalArea <- gArea(CirclesUnionTotal)
+  names(CirclesUnionCategory) <- categories
+  CirclesUnionCategory$total <- CirclesUnionTotal
+  
+  # Calculating the indexes
+  IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea)
+  ICov <- calcCoverageIndex(companiesDF[,c(empInd, categInd)], categories)
+  IDist <- calcDistanceIndex(companiesDF[,c(longInd, latInd, categInd)], region, categories)
+  ISPAG = IDist*IOver*ICov
+  
+  categories <- c(categories, "Total")
+  names(companiesDF) <- c("long","lat","emp", "categories")
+  
+  IndexDF <- data.frame(categories,IDist, IOver,ICov,ISPAG)
+  companyList <- list(companies = companiesDF, longInd = longInd, latInd=latInd, empInd = empInd, categInd = categInd)
+  
+  x <- list( map = region , unionAreaList = CirclesUnionCategory, companiesList = companyList, SPAGIndex = IndexDF)
+  class(x) <- "SPAG"
+  
+  options(warn = currentWarning)
+  return(x);
+}
 
+calcCoverageIndex <- function(employmentCategoryDF, categories){
+  # This data frame consists of two columns - the first with information about employment and the second one with categories
+  totalEmployment <- sum(employmentCategoryDF[,1])
   ICov <- sapply(categories,
-                      function(x){
-                        return (sum(companiesDF[companiesDF[,categInd]==x,empInd])/totalEmployment)
-                      })
+                 function(x){
+                   return (sum(employmentCategoryDF[employmentCategoryDF[,2]==x,1])/totalEmployment)
+                 })
+  return(c(ICov,1))
+}
 
+calcDistanceIndex <- function(coordsCategoryDF, region, categories){
+  
+  IDist<- sapply(categories,
+                 function(x){
+                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3]==x,]), type="regular")
+                   theoreticalDF <- as.data.frame(theoreticalCompanies)
+                   theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
+                   meanDist <- mean(dist(as.matrix(coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)])))/mean(theoreticalDist)
+                   if (is.finite(meanDist)){
+                     return(meanDist)
+                   } else return(0)
+                 })
+  
+  theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF), type="regular")
+  theoreticalDF <- as.data.frame(theoreticalCompanies)
+  theoreticalDist <-dist(as.matrix(theoreticalCompanies@coords))
+  IDistTotal <-  mean(dist(as.matrix(coordsCategoryDF[c(1,2)])))/mean(theoreticalDist)
+  
+  return(c(IDist, IDistTotal))
+}
+
+calcCircles <- function(region,companiesDF,categories){
   # Calculating base radius for other indexes
   # In order to do so I change the CRS to a system in which the area is not showed in degrees
   # as circles in those coordinates are oblate ellipses.
-
-  newCoordinateSystem<-"+init=epsg:3347"
-  # CRS in degrees
-  newCoordinateSystem<-"+proj=longlat +datum=WGS84"
-
-  region<-spTransform(shp, CRS(newCoordinateSystem))
-
   area <- rgeos::gArea(region)
-
   rBase <- sapply(categories,
-                      function(x){
-                        return (sqrt(area/(sum(companiesDF[companiesDF[,categInd]==x,empInd])*pi)))
-                      })
-
-  rBaseTotal <- sqrt(area/(sum(companiesDF[,empInd])*pi))
-
-  rBaseDF <- data.frame(rBase, names=categories)
-
-  baseRadiusVector <- sapply(companiesDF[,categInd],
-           function(x){
-             rBaseDF[rBaseDF$names==x,]$rBase
-           })
-
-  radiusVectorTotal <-sqrt(companiesDF[,empInd])*rBaseTotal
-
-  vectorOfRadius <- sqrt(companiesDF[,empInd])*baseRadiusVector
-
-  # Currently I assume the points in the data frame are traditional coordinates:
-  xySP <- SpatialPoints(companiesDF[,c(longInd,latInd)], proj4string=CRS("+proj=longlat +datum=WGS84"))
-  # Transforming the coordinates to be in the same system as the shapefile
-  xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
-
-  # New circles will appear as circluar in plot
-  circles <-gBuffer(xySP2, quadsegs=150, byid=TRUE, width=vectorOfRadius)
-
-  # Coverage Index for all the companies
-  IDist<- sapply(categories,
-           function(x){
-             theoreticalCompanies <- spsample(region, nrow(companiesDF[companiesDF[,categInd]==x,]), type="regular")
-             theoreticalDF <- as.data.frame(theoreticalCompanies)
-             theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
-             meanDist <- mean(dist(as.matrix(companiesDF[companiesDF[,categInd]==x,c(longInd,latInd)])))/mean(theoreticalDist)
-             if (is.finite(meanDist)){
-               return(meanDist)
-             } else return(0)
-           })
-
-  theoreticalCompanies <- spsample(region, nrow(companiesDF), type="regular")
-  theoreticalDF <- as.data.frame(theoreticalCompanies)
-  theoreticalDist <-dist(as.matrix(theoreticalCompanies@coords))
-  IDistTotal <-  mean(dist(as.matrix(companiesDF[c(longInd,latInd)])))/mean(theoreticalDist)
-
-  #Overlap Index
-
-  IOver <- sapply(categories,
                   function(x){
-                    unionArea <- gUnaryUnion(circles[companiesDF[,categInd]==x])
-                    gArea(unionArea)/gArea(circles[companiesDF[,categInd]==x])
+                    return (sqrt(area/(sum(companiesDF[companiesDF[,4]==x,3])*pi)))
                   })
+  
+  rBaseTotal <- sqrt(area/(sum(companiesDF[,3])*pi))
+  rBaseDF <- data.frame(rBase, names=categories)
+  
+  baseRadiusVector <- sapply(companiesDF[,4],
+                             function(x){
+                               rBaseDF[rBaseDF$names==x,]$rBase
+                             })
+  
+  radiusVectorTotal <-sqrt(companiesDF[,3])*rBaseTotal
+  
+  vectorOfRadius <- sqrt(companiesDF[,3])*baseRadiusVector
+  
+  # Currently I assume the points in the data frame are traditional coordinates:
+  xySP <- SpatialPoints(companiesDF[,c(1,2)], proj4string=CRS("+proj=longlat +datum=WGS84"))
+  # Transforming the coordinates to be in the same system as the shapefile
+  newCoordinateSystem<-"+proj=longlat +datum=WGS84"
+  xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
+  
+  # New circles will appear as circluar in plot
+  return(gBuffer(xySP2, quadsegs=50, byid=TRUE, width=vectorOfRadius))
+}
 
-  CategoryArea <- sapply(categories,
-                        function(x){
-                          unionArea <- gUnaryUnion(circles[companiesDF[,categInd]==x])
-                          unionArea
-                        })
-
-  CategoryArea$proj4string = CRS("+proj=longlat +datum=WGS84")
-
-  # wont work when name total is in a category
-  # redundant code - clean it up
-
-  names(CategoryArea) <- categories
-  CategoryArea$total <- gUnaryUnion(circles)
-
-  unionArea <- maptools::unionSpatialPolygons(circles,rep(1,nrow(companiesDF)))
-  IOverTotal <- gArea(unionArea)/gArea(circles)
-
-
-  ISPAG = IDist*IOver*ICov
-  IndexDF <- data.frame(categories,IDist, IOver,ICov,ISPAG)
-
-  IndexTotal <- data.frame("Total",IDistTotal,IOverTotal,1,IDistTotal*IOverTotal)
-
-  names(IndexTotal) <- c("categories","IDist","IOver","ICov","ISPAG")
-  IndexDF <- rbind(IndexDF,IndexTotal)
-
-  companyList <- list(companies = CompaniesPoland, longInd = longInd, latInd=latInd, empInd = empInd, categInd = categInd)
-
-  x <- list( map = region , unionAreaList = CategoryArea, companiesList = companyList, SPAGIndex = IndexDF)
-  class(x) <- "SPAG"
-
-  options(warn = currentWarning)
-  return(x);
+calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea){
+  IOver <- mapply(function(x,y){
+    y /gArea(circles[companiesDF[,4]==x])
+  },categories,CirclesUnionCategoryArea)
+  
+  IOver <- c(IOver, CirclesUnionTotalArea/gArea(circles))
+  
+  return(IOver)
 }
 
 #' @export

@@ -35,5 +35,5 @@ plot(spagIndex, category = "A")
 plot(spagIndex, category = "A") + coord_map("orthographic")
 plot(spagIndex, category = "B")
 plot(spagIndex, category = "C")
-
 }
+
