@@ -1,12 +1,9 @@
 #' Function calculating the coverage, distance and overlap components of the SPAG Index.
 #'
-#' @param companiesDF - data frame with information regarding the companies. At least four columns are required:
-#' x and y coordinates of the company, the category of company and a numeric
+#' @param companiesDF - data frame with information regarding the companies. The data frame needs four columns:
+#' the longitude and latitude, the number of employees in each company and a category to which the company is assigned.
+#' The columns should be provided in the aforementioned order.
 #' @param shp - SpatialPolygonsDataFrame object obtained via loading a shapefile
-#' @param longInd - number of the column in companiesDF with information regarding the latitude
-#' @param latInd - number of the column in companiesDF with information regarding the longitude
-#' @param empInd - number of the column in companiesDF with numeric data regarding the employment
-#' @param categInd - number of the column in companiesDF information about the category of the company
 #'
 #' @importFrom graphics plot
 #' @importFrom stats dist
@@ -30,7 +27,7 @@
 #' plot(spagIndex, category = "C")
 #' @export
 
-SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd = 4){
+SPAG <- function(companiesDF, shp){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
@@ -40,8 +37,9 @@ SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd =
   
   region<-spTransform(shp, CRS(newCoordinateSystem))
   
+  
   # Calculating the coverage part of SPAG index:
-  categories <- unique(companiesDF[,categInd])
+  categories <- unique(companiesDF[,4])
   
   
   circles <-calcCircles(region,companiesDF,categories)
@@ -49,7 +47,7 @@ SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd =
   # Most intensive part - calculating the union for categories and total
   CirclesUnionCategory <- lapply(categories,
                                  function(x){
-                                   unionArea <- gUnaryUnion(circles[companiesDF[,categInd]==x])
+                                   unionArea <- gUnaryUnion(circles[companiesDF[,4]==x])
                                    unionArea
                                  })
   CirclesUnionTotal <- gUnaryUnion(circles)
@@ -63,17 +61,17 @@ SPAG <- function(companiesDF, shp, longInd = 1, latInd=2, empInd = 3, categInd =
   
   # Calculating the indexes
   IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea)
-  ICov <- calcCoverageIndex(companiesDF[,c(empInd, categInd)], categories)
-  IDist <- calcDistanceIndex(companiesDF[,c(longInd, latInd, categInd)], region, categories)
+  ICov <- calcCoverageIndex(companiesDF[,c(3, 4)], categories)
+  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], region, categories)
   ISPAG = IDist*IOver*ICov
   
   categories <- c(categories, "Total")
   names(companiesDF) <- c("long","lat","emp", "categories")
   
   IndexDF <- data.frame(categories,IDist, IOver,ICov,ISPAG)
-  companyList <- list(companies = companiesDF, longInd = longInd, latInd=latInd, empInd = empInd, categInd = categInd)
+  companyList <- list(companies = companiesDF)
   
-  x <- list( map = region , unionAreaList = CirclesUnionCategory, companiesList = companyList, SPAGIndex = IndexDF)
+  x <- list( map = region , unionAreaList = CirclesUnionCategory, companies = companiesDF, SPAGIndex = IndexDF)
   class(x) <- "SPAG"
   
   options(warn = currentWarning)
@@ -155,27 +153,30 @@ calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCateg
 
 #' @export
 plot.SPAG = function(x, category="total", addCompanies=TRUE){
-
+  
+  currentWarning <- getOption("warn")
+  options(warn = -1)
+  
   mapDF <- fortify(x$map)
   unionArea <- fortify(x$unionAreaList[[category]])
 
   if(category=="total"){
-    companies <- x$companiesList$companies
+    companies <- x$companies
   } else {
-    companies <- x$companiesList$companies[x$companiesList$companies[,x$companiesList$categInd]==category,]
+    companies <- x$companies[x$companies[,4]==category,]
   }
 
   mapPlot <- ggplot() +
              geom_polygon(data=unionArea, aes(long, lat, group=group), colour='red', fill=NA) +
              geom_polygon(data=mapDF, aes(long, lat, group=group), colour='#808080', fill=NA) +
-             theme_bw() +
+             theme_nothing() +
              labs(long="longitude", lat="latitude")
 
 if(addCompanies){
   mapPlot <- mapPlot +
-    geom_point(data=companies[,c(x$companiesList$longInd,x$companiesList$latInd)], aes(long,lat),size=0.4)+
-    coord_map()
-  }
+    geom_point(data=companies[,c(1,2)], aes(long,lat),size=0.4)
+}
+  options(warn = currentWarning)
   mapPlot
 }
 

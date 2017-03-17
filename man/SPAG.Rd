@@ -4,22 +4,14 @@
 \alias{SPAG}
 \title{Function calculating the coverage, distance and overlap components of the SPAG Index.}
 \usage{
-SPAG(companiesDF, shp, longInd = 1, latInd = 2, empInd = 3,
-  categInd = 4)
+SPAG(companiesDF, shp)
 }
 \arguments{
-\item{companiesDF}{- data frame with information regarding the companies. At least four columns are required:
-x and y coordinates of the company, the category of company and a numeric}
+\item{companiesDF}{- data frame with information regarding the companies. The data frame needs four columns:
+the longitude and latitude, the number of employees in each company and a category to which the company is assigned.
+The columns should be provided in the aforementioned order.}
 
 \item{shp}{- SpatialPolygonsDataFrame object obtained via loading a shapefile}
-
-\item{longInd}{- number of the column in companiesDF with information regarding the latitude}
-
-\item{latInd}{- number of the column in companiesDF with information regarding the longitude}
-
-\item{empInd}{- number of the column in companiesDF with numeric data regarding the employment}
-
-\item{categInd}{- number of the column in companiesDF information about the category of the company}
 }
 \description{
 Function calculating the coverage, distance and overlap components of the SPAG Index.
