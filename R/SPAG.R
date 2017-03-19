@@ -167,7 +167,7 @@ plot.SPAG = function(x, category="total", addCompanies=TRUE){
   }
 
   mapPlot <- ggplot() +
-             geom_polygon(data=unionArea, aes(long, lat, group=group), colour='red', fill=NA) +
+             geom_polygon(data=unionArea, aes(long, lat, group=group), colour='#D3D3D3', fill='#D3D3D3') +
              geom_polygon(data=mapDF, aes(long, lat, group=group), colour='#808080', fill=NA) +
              theme_nothing() +
              labs(long="longitude", lat="latitude")
@@ -176,7 +176,7 @@ if(addCompanies){
   mapPlot <- mapPlot +
     geom_point(data=companies[,c(1,2)], aes(long,lat),size=0.4)
 }
-  options(warn = currentWarning)
+  
   mapPlot
 }
 

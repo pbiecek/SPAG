@@ -53,7 +53,7 @@ CompaniesPoland
 
 ## Calculating the index
 
-The package implements function SPAG responsible for calculating the index along with its components. The function takes 2 main parameters - the data frame with companies and spatial data frame with the map and four parameters responsible for setting the order of data in the data frame with companies.
+The package implements function SPAG responsible for calculating the index along with its components. The function takes only 2  parameters - the data frame with companies and a spatial data frame with the map.
 
 ```{r, message=FALSE, warning=FALSE}
 # ?SPAG
@@ -79,7 +79,12 @@ plot(SPAGIndex, category="A")
 plot(SPAGIndex, category="A", addCompanies = FALSE)
 ```
 
-By default the plotted map uses mercator projection but it can be changed by using the `coord_map()` function from package ggplot2:
+By default the index is presented as a map on a white background. This can be changed by adding a theme from ggplot2 package. More information about ggplot2 themes can be found [here](https://www.google.com) :
+```{r}
+ggSPAG + theme_bw()
+```
+
+There are different ways to present a map on a 2 dimensional canvas. By default SPAG Index is plotted using mercator projection but it can be changed by using the `coord_map()` function from package ggplot2:
 
 ```{r}
 ggSPAG + coord_map("ortho", orientation = c(-10, 5, 0))
