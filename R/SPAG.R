@@ -50,11 +50,17 @@ SPAG <- function(companiesDF, shp){
                                    unionArea <- gUnaryUnion(circles[companiesDF[,4]==x])
                                    unionArea
                                  })
-  CirclesUnionTotal <- gUnaryUnion(circles)
+  
+  for (i in 1:length(CirclesUnionCategory)){
+    CirclesUnionCategory[[i]]@polygons[[1]]@ID <- as.character(i)
+  }
+  
+  CirclesUnionTotal <- SpatialPolygons(lapply(CirclesUnionCategory, function(x){x@polygons[[1]]}))
   
   CirclesUnionCategoryArea <- lapply(CirclesUnionCategory, function(x){
     gArea(x)
   })
+  
   CirclesUnionTotalArea <- gArea(CirclesUnionTotal)
   names(CirclesUnionCategory) <- categories
   CirclesUnionCategory$total <- CirclesUnionTotal
@@ -65,7 +71,7 @@ SPAG <- function(companiesDF, shp){
   IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], region, categories)
   ISPAG = IDist*IOver*ICov
   
-  categories <- c(categories, "Total")
+  categories <- c(as.character(categories), "Total")
   names(companiesDF) <- c("long","lat","emp", "categories")
   
   IndexDF <- data.frame(categories,IDist, IOver,ICov,ISPAG)
