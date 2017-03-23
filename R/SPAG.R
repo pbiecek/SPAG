@@ -55,7 +55,7 @@ SPAG <- function(companiesDF, shp){
     CirclesUnionCategory[[i]]@polygons[[1]]@ID <- as.character(i)
   }
   
-  CirclesUnionTotal <- SpatialPolygons(lapply(CirclesUnionCategory, function(x){x@polygons[[1]]}))
+  CirclesUnionTotal <- gUnaryUnion(SpatialPolygons(lapply(CirclesUnionCategory, function(x){x@polygons[[1]]})))
   
   CirclesUnionCategoryArea <- lapply(CirclesUnionCategory, function(x){
     gArea(x)
@@ -98,7 +98,7 @@ calcDistanceIndex <- function(coordsCategoryDF, region, categories){
   
   IDist<- sapply(categories,
                  function(x){
-                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3]==x,]), type="regular")
+                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,]), type="regular")
                    theoreticalDF <- as.data.frame(theoreticalCompanies)
                    theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
                    meanDist <- mean(dist(as.matrix(coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)])))/mean(theoreticalDist)
