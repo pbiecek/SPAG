@@ -98,7 +98,7 @@ calcDistanceIndex <- function(coordsCategoryDF, region, categories){
   
   IDist<- sapply(categories,
                  function(x){
-                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,]), type="regular")
+                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,]), type="regular", offset = c(0,0))
                    theoreticalDF <- as.data.frame(theoreticalCompanies)
                    theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
                    meanDist <- mean(dist(as.matrix(coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)])))/mean(theoreticalDist)
