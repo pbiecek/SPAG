@@ -3,7 +3,11 @@
 #' @param companiesDF - data frame with information regarding the companies. The data frame needs four columns:
 #' the longitude and latitude, the number of employees in each company and a category to which the company is assigned.
 #' The columns should be provided in the aforementioned order.
-#' @param shp - SpatialPolygonsDataFrame object obtained via loading a shapefile
+#' @param shp - SpatialPolygonsDataFrame object obtained via loading a shapefile.
+#' @param theoreticalSample - number of Companies used of the estimation of the average distance between companies assuming 
+#' uniform distribution.
+#' @param empiricalSample - number of companies used for the estimation of the average distance between companeis for which
+#' the distance index is being calculated.
 #'
 #' @importFrom graphics plot
 #' @importFrom stats dist
@@ -27,8 +31,8 @@
 #' plot(spagIndex, category = "C")
 #' @export
 
-SPAG <- function(companiesDF, shp){
-  
+SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000){
+
   currentWarning <- getOption("warn")
   options(warn = -1)
   
@@ -68,7 +72,7 @@ SPAG <- function(companiesDF, shp){
   # Calculating the indexes
   IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea)
   ICov <- calcCoverageIndex(companiesDF[,c(3, 4)], categories)
-  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], region, categories)
+  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], region, categories,theoreticalSample, empiricalSample)
   ISPAG = IDist*IOver*ICov
   
   categories <- c(as.character(categories), "Total")
@@ -94,23 +98,34 @@ calcCoverageIndex <- function(employmentCategoryDF, categories){
   return(c(ICov,1))
 }
 
-calcDistanceIndex <- function(coordsCategoryDF, region, categories){
-  
+calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSample, empiricalSample){
+
   IDist<- sapply(categories,
                  function(x){
-                   theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,]), type="regular", offset = c(0,0))
+                   n <- nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,])
+                   nCompanies <- min(theoreticalSample,n)
+                   theoreticalCompanies <- spsample(region, nCompanies, type="regular", offset = c(0,0))
                    theoreticalDF <- as.data.frame(theoreticalCompanies)
                    theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
-                   meanDist <- mean(dist(as.matrix(coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)])))/mean(theoreticalDist)
+                   
+                   nCompanies <- min(empiricalSample,n)
+                   index<-sample(1:n, nCompanies, replace = FALSE)
+                   companiesChoose = coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)]
+                   meanDist <- mean(dist(as.matrix(companiesChoose[index,])))/mean(theoreticalDist)
                    if (is.finite(meanDist)){
                      return(meanDist)
                    } else return(0)
                  })
   
-  theoreticalCompanies <- spsample(region, nrow(coordsCategoryDF), type="regular")
+  n <- nrow(coordsCategoryDF)
+  nCompanies <- min(theoreticalSample,n)
+  theoreticalCompanies <- spsample(region, nCompanies, type="regular")
   theoreticalDF <- as.data.frame(theoreticalCompanies)
   theoreticalDist <-dist(as.matrix(theoreticalCompanies@coords))
-  IDistTotal <-  mean(dist(as.matrix(coordsCategoryDF[c(1,2)])))/mean(theoreticalDist)
+  
+  nCompanies <- min(empiricalSample,n)
+  index<-sample(1:n, nCompanies, replace = FALSE)
+  IDistTotal <-  mean(dist(as.matrix(coordsCategoryDF[index,c(1,2)])))/mean(theoreticalDist)
   
   return(c(IDist, IDistTotal))
 }

@@ -53,11 +53,11 @@ CompaniesPoland
 
 ## Calculating the index
 
-The package implements function SPAG responsible for calculating the index along with its components. The function takes only 2  parameters - the data frame with companies and a spatial data frame with the map.
+The package implements function SPAG responsible for calculating the index along with its components. The function takes 4 parameters - the data frame with companies, a spatial data frame with the map and two parameters limiting the number of companies required for calculating the Distance Index.
 
 ```{r, message=FALSE, warning=FALSE}
 # ?SPAG
-SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland)
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=1000, empiricalSample=2000)
 print(SPAGIndex)
 ```
 
