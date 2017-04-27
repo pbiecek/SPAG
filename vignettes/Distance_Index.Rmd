@@ -13,7 +13,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-# Construction of Distance Index
+# Konstrukcja Indeksu Distance
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

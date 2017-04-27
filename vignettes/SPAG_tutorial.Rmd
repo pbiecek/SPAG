@@ -63,6 +63,29 @@ print(SPAGIndex)
 
 The SPAG function returns an SPAG object: a dataframe containing SPAG index and its components calculated for every category as well as the data required for visualizing the index.
 
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+setwd("C:/Users/Max/Desktop/TestEmpiryczny")
+dane<-read.csv("geoloc data.csv", header=TRUE, sep=";", dec=".")
+dane$zatr<-ifelse(dane$GR_LPRAC==1, 5, ifelse(dane$GR_LPRAC==2, 30, ifelse(dane$GR_LPRAC==3,150, ifelse(dane$GR_LPRAC==4, 600, 1500))))
+CompaniesPoland<-dane[dane$SEK_PKD7 %in% c("B","C","D","E"), c(23,24,25,26) ]
+```
+
+The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time and space complexity of $O(n^2)$. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:
+
+```{r, message=FALSE, warning=FALSE}
+startTime <- Sys.time()
+SPAGIndexFULL <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=10000, empiricalSample=10000)
+endTime <- Sys.time()
+print(SPAGIndexFULL)
+print(endTime-startTime)
+
+startTime <- Sys.time()
+SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100)
+endTime <- Sys.time()
+print(SPAGIndexSAM)
+print(endTime-startTime)
+```
+
 ## Plotting the Index
 
 The plot function implemented for SPAG objects uses `ggplot2` and `ggmap` packages. The function returns an object of class ggplot which can be further modified using functionalities from the aforementioned packages. By default the function returnes the SPAG index calculated for all categories:

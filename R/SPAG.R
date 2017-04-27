@@ -67,7 +67,7 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000)
   
   CirclesUnionTotalArea <- gArea(CirclesUnionTotal)
   names(CirclesUnionCategory) <- categories
-  CirclesUnionCategory$total <- CirclesUnionTotal
+  CirclesUnionCategory$Total <- CirclesUnionTotal
   
   # Calculating the indexes
   IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea)
@@ -173,25 +173,27 @@ calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCateg
 }
 
 #' @export
-plot.SPAG = function(x, category="total", addCompanies=TRUE){
+plot.SPAG = function(x, category="Total", addCompanies=TRUE){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
   
   mapDF <- fortify(x$map)
   unionArea <- fortify(x$unionAreaList[[category]])
-
-  if(category=="total"){
+  tekstX = min(min(mapDF[,1]), min(unionArea[,1]))+1
+  tekstY = max(max(mapDF[,2]), max(unionArea[,2]))
+  if(category=="Total"){
     companies <- x$companies
   } else {
     companies <- x$companies[x$companies[,4]==category,]
   }
-
+  print(tekstX)
   mapPlot <- ggplot() +
              geom_polygon(data=unionArea, aes(long, lat, group=group), colour='#D3D3D3', fill='#D3D3D3') +
              geom_polygon(data=mapDF, aes(long, lat, group=group), colour='#808080', fill=NA) +
              theme_nothing() +
-             labs(long="longitude", lat="latitude")
+             labs(long="longitude", lat="latitude") #+
+            # annotate("text", x=tekstX, y=tekstY, label= paste("Category: ",category ))
 
 if(addCompanies){
   mapPlot <- mapPlot +
