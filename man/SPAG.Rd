@@ -4,7 +4,8 @@
 \alias{SPAG}
 \title{Function calculating the coverage, distance and overlap components of the SPAG Index.}
 \usage{
-SPAG(companiesDF, shp, theoreticalSample = 1000, empiricalSample = 1000)
+SPAG(companiesDF, shp, theoreticalSample = 1000, empiricalSample = 1000,
+  numberOfSamples = 1, eachArea = FALSE, CRSProjection)
 }
 \arguments{
 \item{companiesDF}{- data frame with information regarding the companies. The data frame needs four columns:
