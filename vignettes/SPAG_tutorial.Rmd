@@ -1,0 +1,192 @@
+
+---
+title: "SPAG package tutorial (vignette)"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{SPAG tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{Cairo}
+  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
+---
+
+# R tool for measuring economic activity
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This package provides a method for calculating and visualizing the Index of Spatial Agglomeration (SPAG) used for measuring the territorial integrity of industries.
+
+## Installation
+
+The package can be downloaded and installed from GitHub:
+
+```{r eval=FALSE}
+devtools::install_github("pbiecek/SPAG")
+```
+
+Use the `library()` function to load the package.
+
+```{r, warning=FALSE, message=FALSE}
+library("SPAG")
+```
+
+## Data sets
+
+In order to calculate the SPAG Index two arguments have to be provided - information about the area and companies for which the index is supposed to be calculated. The area should be provided as a SpatialPolygonsDataFrame. An exemplary map in the format of a SpatialPolygonsDataFrame is provided with the package:
+
+```{r eval=FALSE}
+?ShapefilePoland
+ShapefilePoland
+```
+
+The information about the companies should be provided in the form of a data frame with four columns: the geographical coordinates of the companies (longitude and latitute), the number of people working for the company (numeric) and a categorical value defining the field of work of the company. A data frame with such data is provided in the package:
+
+```{r}
+# ?CompaniesPoland
+head(CompaniesPoland)
+```
+
+## Calculating the index
+
+The package implements function SPAG responsible for calculating the index along with its components. The function takes up to 8 parameters - but only the data frame with companies and a spatial data frame with the map is necessary. The additional parameters are:
+	
+* **companiesProjection - by default the function assumes that the geographical coordinates in the data frame with information about the companies is given in the same projection as the map. If the map is given in other projection, then this string argument modifies the data frame accordingly.
+
+* **CRSProjection** - this string argument modifies the geographical coordinates of the map and data frame.
+
+* **theoreticalSample** - the time and space compexity of the algorithm used for calculating the average distance between uniformly distributed companies is too big, therefore a sample of size theoreticalSample is used as an basis for estimating the real theoretical distance. By default the size of the sample is 1000.
+
+* **empiricalSample** - this argument plays the same role as the former one but is used for estimating the real empirical distance.
+
+* **numberOfSamples** - in order to improve the accuracy of the calculated distance index boosting is applied. The numberOfSamples defines how many times the distance index should be calculated (to get the average of results).
+
+* **eachArea** - by default the SPAG index is calculated for the whole area. This can be changed by setting this parameter to true - if so the index is calculated for each area within the spatial data frame separately.
+
+
+```{r, message=FALSE, warning=FALSE}
+# ?SPAG
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=200)
+print(SPAGIndex)
+```
+
+The SPAG function returns an SPAG object: a dataframe containing SPAG index and its components calculated for every category as well as the data required for visualizing the index.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#setwd("C:/Users/Max/Desktop/TestEmpiryczny")
+#dane<-read.csv("geoloc data.csv", header=TRUE, sep=";", dec=".")
+#dane$zatr<-ifelse(dane$GR_LPRAC==1, 5, ifelse(dane$GR_LPRAC==2, 30, ifelse(dane$GR_LPRAC==3,150, ifelse(dane$GR_LPRAC==4, #600, 1500))))
+#CompaniesPoland<-dane[dane$SEK_PKD7 %in% c("B","C","D","E"), c(23,24,25,26) ]
+```
+
+The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time and space complexity of $O(n^2)$. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:
+
+```{r, message=FALSE, warning=FALSE}
+startTime <- Sys.time()
+SPAGIndexFULL <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=10000, empiricalSample=10000)
+endTime <- Sys.time()
+print(SPAGIndexFULL)
+print(endTime-startTime)
+
+startTime <- Sys.time()
+SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100)
+endTime <- Sys.time()
+print(SPAGIndexSAM)
+print(endTime-startTime)
+```
+
+Parameter numberOfSamples defines the number of times the distance index will be calculated. This increases the total time of calculations but results in more accurate result
+```{r, message=FALSE, warning=FALSE}
+startTime <- Sys.time()
+SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100,
+                     numberOfSamples=1)
+endTime <- Sys.time()
+print(SPAGIndexSAM)
+print(endTime-startTime)
+```
+
+The SPAG function also provides a method for calculating the SPAG Index with regards to regions, which simplifies the analysis:
+
+```{r, message=FALSE, warning=FALSE}
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100,
+                     numberOfSamples=1, eachArea = TRUE)
+SPAGIndex
+```
+## Plotting the Index
+
+SPAG package allows plotting the index using innate plot functions as well as the `ggplot2` and `ggmap` packages. The first just prints out the map with circles:
+```{r echo=FALSE}
+plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
+  
+  currentMargain <- par()$mar
+  
+  if(category=="Total"){
+    companies <- attr(x,"companies")
+  } else {
+    companies <- attr(x,"companies")[attr(x,"companies")[,4]==category,]
+  }
+  
+  if(circleUnion){
+    polygonArea <- attr(x,"unionAreaList")[[category]]
+  } else {
+    polygonArea <- attr(x,"circles")[[category]]
+  }
+  
+  par(mar = rep(0, 4))
+  plot(attr(x,"map"), border='#808080')
+  plot(polygonArea, add=TRUE)
+ #plot(x@unionAreaList[["Total"]])
+ #plot(x@map, border='#808080', add=TRUE)
+ ##points(companies[,c(1,2)], add=TRUE)
+ if(addCompanies){points(companies[,c(1,2)],pch=16,cex=0.2)}
+  
+ par(mar=currentMargain)
+}
+```
+
+```{r}
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland)
+plot(SPAGIndex)
+```
+
+The ggplot function used on an object of class SPAG returns a a ggplot object that can be plotted or modified:
+
+```{r}
+ggSPAG <- ggplot(SPAGIndex)
+ggSPAG
+```
+
+By default both plotting function plot the index for all the data, but this can be modified by setting the category parameter to match the category for which we want to plot the SPAG Index:
+
+```{r}
+plot(SPAGIndex, category="gimn.")
+plot(SPAGIndex, category="gimn.", addCompanies = FALSE)
+```
+
+By default the circles representing the overlap index are plotted separately, but the plot functions also provide an interface to plot the union of the areas:
+```{r}
+plot(SPAGIndex, circleUnion=TRUE)
+```
+
+By default the index is presented as a map on a white background. This can be changed by adding a theme from ggplot2 package. More information about ggplot2 themes can be found [here](https://www.google.com) :
+
+```{r}
+ggSPAG + theme_bw()
+```
+
+There are different ways to present a map on a 2 dimensional canvas. By default SPAG Index is plotted using mercator projection but it can be changed by using the `coord_map()` function from package ggplot2:
+
+```{r}
+ggSPAG + coord_map("ortho", orientation = c(-10, 5, 0))
+ggSPAG + coord_map("conic", lat=20) + coord_flip()
+```
+
+Instead of manipulating with the map after calculating the SPAG Index it is possible to change the coordinates of the map and companies before the calculation. This functionality is provided with the parameter CRSProjection:
+```{r}
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, CRSProjection="+proj=longlat +datum=WGS84")
+ggplot(SPAGIndex)
+```

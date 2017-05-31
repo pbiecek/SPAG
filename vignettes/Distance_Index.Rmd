@@ -1,0 +1,159 @@
+
+---
+title: "Distance Index Analysis (vignette)"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{SPAG tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{Cairo}
+  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
+---
+
+# Konstrukcja Indeksu Distance
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Distance Index, bêd¹cy czêœci¹ wyliczanego indeksu SPAG jest wyliczany poprzez wyznaczenie stosunku œredniej odleg³oœci pomiêdzy firmami do œredniej odleg³oœci pomiêdzy firmami w przypadku gdy by³yby roz³o¿one w sposób jednorodny na obszarze. Taki sposób zdefiniowania tego indeksu sprawia pewne trudnoœci - jednorodne rozmieszczenie okreœlonej liczby firm na obszarze nie jest deterministyczne, w zwi¹zku z czym tak¿e otrzymywane wartoœci indeksu nie s¹ sta³e. Dodatkowo w algorytmie korzysta siê ze œredniej odleg³oœci pomiêdzy firmami, który ma z³o¿onoœæ objêtoœciow¹ wynosz¹c¹ $O(n^2)$, co sprawia, ¿e nawet dla niewielkiej liczby firm wyznaczenie wartoœci tego indeksu mo¿e okazaæ siê zbyt czasoch³onne dla przeciêtnego komputera. 
+Problem z czasem wyliczania indeksu wydaje siê byæ na tyle powa¿ny, ¿e niezbêdne jest opracowanie bardziej wydajnego sposobu jego otrzymywanie. W poni¿szym opracowaniu przedstawiona jest analiza otrzymywanych wartoœci indeksu Distance, w przypadku, gdy jest on wyliczany na pewnym podzbiorze firm.
+
+## Funkcja Distance
+
+Na potrzeby dalszych analiz funkcja wyliczaj¹ca indeks Distance zosta³a uproszczona i dostosowana do dzia³ania dla jednej kategorii:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+calcDistanceIndex <- function(coordsCategoryDF, region, theoreticalCompaniesSample=100, empiricalCompaniesSample=3000){
+  
+  liczbaPraw <- min(empiricalCompaniesSample,k)
+  indeksy<-sample(1:k, liczbaPraw, replace = FALSE)
+  currentCategoryFinal <- currentCategory[indeksy,]
+  
+  theoreticalCompanies <- spsample(region, liczbaPraw, type="regular")
+  theoreticalDF <- as.data.frame(theoreticalCompanies)
+  k <- nrow(theoreticalDF)
+  liczbaPrawTheo <- min(theoreticalCompaniesSample,k)
+  indeksy<-sample(1:k, liczbaPrawTheo, replace = FALSE)
+  theoreticalDist <- dist(as.matrix(theoreticalCompanies@coords)[indeksy,])
+  IDist <- mean(dist(currentCategoryFinal))/mean(theoreticalDist)
+
+  return(IDist)
+}
+```
+
+## Zbiór testowy.
+
+Na potrzeby testów wykorzystany zosta³ zbiór ok 37 tysiêcy firm znajduj¹cych siê w województwie lubelskim, a tak¿e mapa województwa Lubelskiego. Testy zosta³y przeprowadzone na podzbiorach ró¿nej licznoœci.
+
+
+```{r, message=FALSE, warning=FALSE}
+library(SPAG)
+setwd("C:/Users/Max/Desktop/MGR_ROZNE/SPAGstarerepo/SPAG/materials/aglomeracja/")
+dane<-read.csv("geoloc data.csv", header=TRUE, sep=";", dec=".")
+dane$zatr<-ifelse(dane$GR_LPRAC==1, 5, ifelse(dane$GR_LPRAC==2, 30, ifelse(dane$GR_LPRAC==3,150, ifelse(dane$GR_LPRAC==4, 600, 1500))))
+TestCompanies <- dane[,c(23,24,25,12)]
+TestCompanies <- TestCompanies[TestCompanies$SEK_PKD7=="C",]
+print(nrow(TestCompanies))
+
+ShapefileDF<-as.data.frame(ShapefilePoland)
+region<-ShapefilePoland#[ShapefileDF$jpt_nazwa_=="lubelskie",]
+newCoordinateSystem<-"+proj=longlat +datum=WGS84"
+region<-spTransform(region, CRS(newCoordinateSystem))
+```
+
+## Distance Index na zbiorze o ma³ej licznoœci 
+
+W pierwszej czêœci postara³em siê sprawdziæ jak dla ma³ego zbioru testowego wygl¹da SD:
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyr)
+library(ggplot2)
+load("C:\\Users\\Max\\Desktop\\Dane\\CCategory100FULL.rda")
+load("C:\\Users\\Max\\Desktop\\Dane\\CCategory200FULL.rda")
+load("C:\\Users\\Max\\Desktop\\Dane\\CCategory500FULL.rda")
+load("C:\\Users\\Max\\Desktop\\Dane\\CCategory1000FULL.rda")
+load("C:\\Users\\Max\\Desktop\\Dane\\CCategoryFULLFULL.rda")
+
+CCategoryTest <- cbind(CCategory100FULL,CCategory200FULL,CCategory500FULL,CCategory1000FULL,CCategoryFULLFULL)
+CCategoryTest <- CCategoryTest %>% gather(type,value)
+CCategoryTest$type <- factor(as.factor(CCategoryTest$type),c("100", "200", "500", "1000", "FULL"))
+ggplot() +
+  geom_boxplot(data=CCategoryTest, mapping=aes(type,value))
+
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory100FULL1.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory200FULL1.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory500FULL1.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory1000FULL1.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory80000FULL1.rda")
+
+
+CCategoryTest <- cbind(CCategory100FULL1,CCategory200FULL1,CCategory500FULL1,CCategory1000FULL1,CCategory80000FULL1)
+names(CCategoryTest) <- c("100", "200", "500", "1000", "FULL")
+CCategoryTest <- CCategoryTest %>% gather(type,value)
+CCategoryTest$type <- factor(as.factor(CCategoryTest$type),c("100", "200", "500", "1000", "FULL"))
+ggplot() +
+  geom_boxplot(data=CCategoryTest, mapping=aes(type,value))
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory100FULL2.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory200FULL2.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory500FULL2.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory1000FULL2.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory80000FULL2.rda")
+
+CCategoryTest <- cbind(CCategory100FULL2,CCategory200FULL2,CCategory500FULL2,CCategory1000FULL2,CCategory80000FULL2)
+names(CCategoryTest) <- c("100", "200", "500", "1000", "FULL")
+CCategoryTest <- CCategoryTest %>% gather(type,value)
+CCategoryTest$type <- factor(as.factor(CCategoryTest$type),c("100", "200", "500", "1000", "FULL"))
+ggplot() +
+  geom_boxplot(data=CCategoryTest, mapping=aes(type,value))
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory100FULL3.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory200FULL3.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory500FULL3.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory1000FULL3.rda")
+load("C:/Users/Max/Desktop/Dane/testIlosci/CCategory80000FULL3.rda")
+
+CCategoryTest <- cbind(CCategory100FULL3,CCategory200FULL3,CCategory500FULL3,CCategory1000FULL3,CCategory80000FULL3)
+names(CCategoryTest) <- c("100", "200", "500", "1000", "FULL")
+CCategoryTest <- CCategoryTest %>% gather(type,value)
+CCategoryTest$type <- factor(as.factor(CCategoryTest$type),c("100", "200", "500", "1000", "FULL"))
+ggplot() +
+  geom_boxplot(data=CCategoryTest, mapping=aes(type,value))
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+
+CCategoryTest <- cbind(CCategory1000FULL1,CCategory1000FULL2,CCategory1000FULL3)
+names(CCategoryTest) <- c("1","2","3")
+CCategoryTest <- CCategoryTest %>% gather(type,value)
+CCategoryTest$type <- factor(as.factor(CCategoryTest$type),c("1","2","3"))
+ggplot() +
+  geom_boxplot(data=CCategoryTest, mapping=aes(type,value))
+
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+print(c(sd(CCategory1000FULL1[,1])/mean(CCategory1000FULL1[,1]), sd(CCategory1000FULL2[,1])/mean(CCategory1000FULL2[,1]), sd(CCategory1000FULL3[,1])/mean(CCategory1000FULL3[,1])))
+
+print(c(sd(CCategory500FULL1[,1])/mean(CCategory500FULL1[,1]), sd(CCategory500FULL2[,1])/mean(CCategory500FULL2[,1]), sd(CCategory500FULL3[,1])/mean(CCategory500FULL3[,1])))
+
+
+print(c(sd(CCategory100FULL1[,1])/mean(CCategory100FULL1[,1]), sd(CCategory100FULL2[,1])/mean(CCategory100FULL2[,1]), sd(CCategory100FULL3[,1])/mean(CCategory100FULL3[,1])))
+
+```

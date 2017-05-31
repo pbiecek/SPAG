@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="date" content="2017-04-27" />
+
+<title>Teoretyczne próbkowanie przestrzenne</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Teoretyczne próbkowanie przestrzenne</h1>
+<h4 class="date"><em>2017-04-27</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#istniejacy-algorytm-probkowania-jednorodnego-punktow">Istniejący algorytm próbkowania jednorodnego punktów</a><ul>
+<li><a href="#dane-do-testow.">Dane do testów.</a></li>
+<li><a href="#obecne-podejscie">Obecne podejście</a></li>
+<li><a href="#deterministycznosc">Deterministyczność</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="istniejacy-algorytm-probkowania-jednorodnego-punktow" class="section level1">
+<h1>Istniejący algorytm próbkowania jednorodnego punktów</h1>
+<p>Indeks Distance zdefiniowany jest jako stosunek średniej odległości pomiędzy rzeczywistymi firmami do średniej odległości pomiędzy firmami w założeniu, że byłyby one rozłożone w sposób równomierny na całym obszarze: <span class="math display">\[I_{dist} = \frac{ \frac{1}{k} \sum_{i,j} d(i,j) }{\frac{1}{ \hat{k} }  \sum_{i,j} \hat{d}(i,j) } \]</span> Przy takim podejściu niezbędne jest określenie tego, co oznacza “rozkład równomierny na obszarze”. W poniższym tekście postaram się przedstawić obecnie wykorzystywaną w tym celu metodę.</p>
+<div id="dane-do-testow." class="section level2">
+<h2>Dane do testów.</h2>
+<p>Na potrzeby dalszej analizy zostanie wykorzystana następująca mapa Polski:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(SPAG)
+n &lt;-<span class="st"> </span><span class="dv">1374</span>
+newCoordinateSystem&lt;-<span class="st">&quot;+proj=longlat +datum=WGS84&quot;</span>
+region&lt;-<span class="kw">spTransform</span>(ShapefilePoland, <span class="kw">CRS</span>(newCoordinateSystem))
+
+mapaPolski &lt;-<span class="st"> </span><span class="kw">ggplot</span>() +
+<span class="st">  </span><span class="kw">geom_polygon</span>(<span class="dt">data=</span>region, <span class="kw">aes</span>(long, lat, <span class="dt">group=</span>group), <span class="dt">colour=</span><span class="st">'#808080'</span>, <span class="dt">fill=</span><span class="ot">NA</span>) +
+<span class="st">  </span><span class="kw">theme_nothing</span>() +
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">long=</span><span class="st">&quot;longitude&quot;</span>, <span class="dt">lat=</span><span class="st">&quot;latitude&quot;</span>)
+mapaPolski</code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+</div>
+<div id="obecne-podejscie" class="section level2">
+<h2>Obecne podejście</h2>
+<p>Równomierne rozmieszczenie punktów na danym obszarze otrzymuję się poprzez naniesienie kraty punktów o odpowiednim rozmiarze na dany obszar, a następnie zostawienie części wspólnej zbioru punktów i obszaru.</p>
+<p>Proces ten można podzielić na trzy etapy. Pierwszym z nich jest wyznaczenie rozmiaru kraty, która posłuży do wyznaczania punktów. W tym celu wyznacza się stosunek powierzchni ramki ograniczającej rozważany obszar do powierzchni samego obszaru. Otrzymany stosunek jest następnie wykorzystywany do wyznaczenia rzeczywistej liczby punktów potrzebnych do naniesienia na obszar:</p>
+<p><span class="math display">\[ \hat{n}  = \frac{P_{box} }{ P_{area} } \cdot n\]</span></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>region
+bb =<span class="st"> </span><span class="kw">bbox</span>(region)
+
+getArea =<span class="st"> </span>function(x) {
+    getAreaPolygons =<span class="st"> </span>function(x) {
+      holes =<span class="st"> </span><span class="kw">unlist</span>(<span class="kw">lapply</span>(x@Polygons, function(x) x@hole))
+      areas =<span class="st"> </span><span class="kw">unlist</span>(<span class="kw">lapply</span>(x@Polygons, function(x) x@area))
+      area =<span class="st"> </span><span class="kw">ifelse</span>(holes, -<span class="dv">1</span>, <span class="dv">1</span>) *<span class="st"> </span>areas
+      area
+    }
+    <span class="kw">sum</span>(<span class="kw">unlist</span>(<span class="kw">lapply</span>(region@polygons, getAreaPolygons)))
+}
+  
+  area =<span class="st"> </span><span class="kw">getArea</span>(x)
+  res &lt;-<span class="st"> </span><span class="ot">NULL</span>
+  bb.area =<span class="st"> </span>(bb[<span class="dv">1</span>,<span class="dv">2</span>]-bb[<span class="dv">1</span>,<span class="dv">1</span>]) *<span class="st"> </span>(bb[<span class="dv">2</span>,<span class="dv">2</span>]-bb[<span class="dv">2</span>,<span class="dv">1</span>]) 
+  <span class="kw">print</span>( <span class="kw">paste</span>(<span class="st">&quot;Obszar ramki wynosi:&quot;</span>, bb.area))</code></pre></div>
+<pre><code>## [1] &quot;Obszar ramki wynosi: 58.4659615040965&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  n_tot =<span class="st"> </span><span class="kw">round</span>(n *<span class="st"> </span>bb.area/area) 
+  <span class="kw">print</span>( <span class="kw">paste</span>(<span class="st">&quot;Rzeczywista liczba nanoszonych punktów wynosi:&quot;</span>,n_tot))</code></pre></div>
+<pre><code>## [1] &quot;Rzeczywista liczba nanoszonych punktów wynosi: 1957&quot;</code></pre>
+<p>W drugim etapie wyznaczana jest siatka punktów, która jest następnie nanoszona na obszar. W tym celu niezbędne jest wyliczenie długości boku wycinka kraty:</p>
+<p><span class="math display">\[ c = \sqrt{ \frac{P_{box} }{\hat{n}} } = \sqrt{  P_{box} \cdot\frac{P_{area} }{ P_{box} \cdot n} }=\sqrt{  \frac{P_{area} }{n } }\]</span></p>
+<p>znając już rozmiar wycinka siatki niezbędne jest umiejscowienie jej na dany obszar. Domyślnie, rysowanie siatki rozpoczyna się od umieszczenia jej w lewym dolnym rogu, a następnie przesunięciu jej o losowy wektor o dodatnich współrzędnych.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  offset =<span class="st"> </span><span class="kw">runif</span>(<span class="dv">2</span>)
+  pw =<span class="fl">0.5</span> 
+  nsig &lt;-<span class="st"> </span><span class="dv">20</span>
+  cellsize =<span class="st"> </span>(<span class="kw">prod</span>(<span class="kw">apply</span>(bb, <span class="dv">1</span>, diff))/n_tot) ^<span class="st"> </span>pw 
+  cellsize =<span class="st"> </span><span class="kw">min</span>(cellsize, <span class="kw">min</span>(<span class="kw">apply</span>(bb, <span class="dv">1</span>, diff)))
+  cellsize =<span class="st"> </span><span class="kw">rep</span>(cellsize, <span class="kw">nrow</span>(bb))
+  min.coords =<span class="st"> </span><span class="kw">pmax</span>(bb[,<span class="dv">1</span>], <span class="kw">signif</span>(bb[,<span class="dv">1</span>] +<span class="st"> </span>offset *<span class="st"> </span>cellsize, nsig)) <span class="co"># nsig =20</span>
+  expand.grid.arglist =<span class="st"> </span><span class="kw">list</span>()
+  
+  for (i in <span class="dv">1</span>:<span class="kw">nrow</span>(bb)) {
+    name =<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;x&quot;</span>, i, <span class="dt">sep =</span> <span class="st">&quot;&quot;</span>)
+    sign =<span class="st"> </span><span class="kw">ifelse</span>(min.coords[i] &lt;<span class="st"> </span>bb[i,<span class="dv">2</span>], <span class="dv">1</span>, -<span class="dv">1</span>) <span class="co"># sprawdzenie jeszcze raz kierunku</span>
+    expand.grid.arglist[[name]] =<span class="st"> </span><span class="kw">seq</span>(min.coords[i], bb[i,<span class="dv">2</span>], sign *<span class="st"> </span>cellsize[i])
+  }
+  
+  xy =<span class="st"> </span><span class="kw">do.call</span>(expand.grid, expand.grid.arglist)
+  <span class="kw">attr</span>(xy, <span class="st">&quot;cellsize&quot;</span>) =<span class="st"> </span>cellsize
+  mapaPolski +<span class="st"> </span><span class="kw">geom_point</span>(<span class="dt">data=</span>xy, <span class="kw">aes</span>(x1,x2))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>W ostatnim etapie odcinane są punkty, które nie należą do rozważanej powierzchnii:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> sel =<span class="st"> </span>xy[,<span class="dv">1</span>] &gt;=<span class="st"> </span>bb[<span class="dv">1</span>,<span class="dv">1</span>] &amp;<span class="st"> </span>xy[,<span class="dv">1</span>] &lt;=<span class="st"> </span>bb[<span class="dv">1</span>,<span class="dv">2</span>] &amp;<span class="st"> </span>
+<span class="st">    </span>xy[,<span class="dv">2</span>] &gt;=<span class="st"> </span>bb[<span class="dv">2</span>,<span class="dv">1</span>] &amp;<span class="st"> </span>xy[,<span class="dv">2</span>] &lt;=<span class="st"> </span>bb[<span class="dv">2</span>,<span class="dv">2</span>]
+  xy =<span class="st"> </span>xy[sel,, drop =<span class="st"> </span><span class="ot">FALSE</span>]
+  <span class="kw">rownames</span>(xy) =<span class="st"> </span><span class="ot">NULL</span>
+  pts &lt;-<span class="st"> </span><span class="kw">SpatialPoints</span>(xy, <span class="kw">CRS</span>(<span class="kw">proj4string</span>(x)))
+  Over_pts_x &lt;-<span class="st"> </span><span class="kw">over</span>(pts, <span class="kw">geometry</span>(x))
+  
+  Not_NAs &lt;-<span class="st"> </span>!<span class="kw">is.na</span>(Over_pts_x)
+  res &lt;-<span class="st"> </span>pts[Not_NAs]
+  res &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(res)
+  mapaPolski +<span class="st"> </span><span class="kw">geom_point</span>(<span class="dt">data=</span>res, <span class="kw">aes</span>(x1,x2))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="deterministycznosc" class="section level2">
+<h2>Deterministyczność</h2>
+<p>Fakt, że ostateczne umieszczenie siatki jest dokonywane w sposób losowy implikuje zmienną liczbę punktów, które zostaną naniesione na rozważaną powierzchnię. To z kolei powoduje, że wyliczana wartość indeksu Distance również nie będzie deterministyczna. W celu usunięcia tej zmienności w kolejnych implementacjach funkcji SPAG przesunięcie losowe ustawiane jest na stałą wartość 0.</p>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
