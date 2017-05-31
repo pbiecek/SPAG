@@ -9,6 +9,9 @@
 #' @param empiricalSample - number of companies used for the estimation of the average distance between companeis for which
 #' the distance index is being calculated.
 #'
+#'
+#'
+#'
 #' @importFrom graphics plot
 #' @importFrom stats dist
 #' @import maptools
@@ -32,25 +35,31 @@
 #' @export
 
 SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, eachArea=FALSE,
-                 CRSProjection){
+                 companiesProjection, CRSProjection){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
   
-  # problem jeœli companiesDF bêdzie w innej projekcji niz shapefile
+  
+  if(!missing(companiesProjection)){
+    companySpatialPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=companiesProjection)
+  } else{
+    companySpatialPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=shp@proj4string)
+  }
+  
   if(!missing(CRSProjection)){
     if(!identical(shp@proj4string, CRS(CRSProjection))){
       #newCoordinateSystem<-"+init=epsg:3347" # In this coordinates a circle looks like a circle
-      companySpatialPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=shp@proj4string)
-      shp <- spTransform(shp, CRS(CRSProjection))
-      companySpatialPoints <- spTransform(companySpatialPoints, CRS(CRSProjection))
+      shp <- spTransform(shp, CRSProjection)
+      companySpatialPoints <- spTransform(companySpatialPoints, CRSProjection)
       companiesDF[,c(1,2)] <- as.data.frame(companySpatialPoints)
-      CRSProjection <- CRS(CRSProjection)
+     # CRSProjection <- CRS(CRSProjection)
     }
+    CRSProjection <-CRS(CRSProjection)
   } else {
     CRSProjection <- shp@proj4string
   }
-
+  
   if(!eachArea){
     result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection)
     return(result)
@@ -135,10 +144,12 @@ SPAGSingle <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample
  # setClass("SPAG", representation(map="SpatialPolygonsDataFrame", unionAreaList="list", companies="data.frame", SPAGIndex ="data.frame", circles="list"))
 # x <- new("SPAG",  map=shp, unionAreaList = CirclesUnionCategory, companies = companiesDF, SPAGIndex = IndexDF, circles=circlesList)
   x <- IndexDF
+  attr(x, "IndexDF") <- IndexDF
   attr(x, "map") <- shp
   attr(x, "unionAreaList") <- CirclesUnionCategory
   attr(x, "companies") <- companiesDF
   attr(x, "circles") <-circlesList
+ # setOldClass("data.frame")
   class(x) <- "SPAG"
   
   return(x);
@@ -275,19 +286,20 @@ ggplot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE
   options(warn = -1)
   
   if(circleUnion){
-    polygonArea <- fortify(x@unionAreaList[[category]])
+    
+    polygonArea <- fortify(attr(x,"unionAreaList")[[category]])
   } else {
-    polygonArea <- fortify(x@circles[[category]])
+    polygonArea <- fortify(attr(x,"circles")[[category]])
   }
   
-  mapDF <- fortify(x@map)
+  mapDF <- fortify(attr(x,"map"))
   tekstX = min(min(mapDF[,1]), min(polygonArea[,1]))+1
   tekstY = max(max(mapDF[,2]), max(polygonArea[,2]))
   
   if(category=="Total"){
-    companies <- x@companies
+    companies <- attr(x,"companies")
   } else {
-    companies <- x@companies[x@companies[,4]==category,]
+    companies <- attr(x,"companies")[attr(x,"companies")[,4]==category,]
   }
   
   if(circleUnion){
@@ -315,28 +327,33 @@ ggplot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE
 
 plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
   
+  currentMargain <- par()$mar
+  
   if(category=="Total"){
-    companies <- x@companies
+    companies <- attr(x,"companies")
   } else {
-    companies <- x@companies[x@companies[,4]==category,]
+    companies <- attr(x,"companies")[attr(x,"companies")[,4]==category,]
   }
   
   if(circleUnion){
-    polygonArea <- x@unionAreaList[[category]]
+    polygonArea <- attr(x,"unionAreaList")[[category]]
   } else {
-    polygonArea <- x@circles[[category]]
+    polygonArea <- attr(x,"circles")[[category]]
   }
   
-
-  plot(x@map, border='#808080')
+  par(mar = rep(0, 4))
+  plot(attr(x,"map"), border='#808080')
   plot(polygonArea, add=TRUE)
  #plot(x@unionAreaList[["Total"]])
  #plot(x@map, border='#808080', add=TRUE)
  ##points(companies[,c(1,2)], add=TRUE)
  if(addCompanies){points(companies[,c(1,2)],pch=16,cex=0.2)}
+  
+ par(mar=currentMargain)
 }
 
 #' @export
-#print.SPAG = function(x, ...){
-#  print(attr)
-#}
+print.SPAG = function(x, ...){
+  print(attr(x, "IndexDF") )
+}
+
