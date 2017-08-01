@@ -228,7 +228,7 @@ calcCircles <- function(region,companiesDF,categories, CRSProjection){
   
   # Currently I assume the points in the data frame are traditional coordinates:
 
-  xySP <- SpatialPoints(companiesDF[,c(1,2)], proj4string=CRSProjection)
+  xySP <- SpatialPoints(companiesDF[,c(1,2)]) #SpatialPoints(companiesDF[,c(1,2)], proj4string=CRSProjection) - dodanie projekcji wykrzywia kó³ka
 
   # Transforming the coordinates to be in the same system as the shapefile
   # newCoordinateSystem<-"+proj=longlat +datum=WGS84"
@@ -341,9 +341,10 @@ plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
     polygonArea <- attr(x,"circles")[[category]]
   }
   
-  par(mar = rep(0, 4))
-  plot(attr(x,"map"), border='#808080')
-  plot(polygonArea, add=TRUE)
+  par(mar = rep(0, 4)) # not working correctly
+  plot(polygonArea, col='#808080')
+  plot(attr(x,"map"), border='#808080', add=TRUE)
+  
  #plot(x@unionAreaList[["Total"]])
  #plot(x@map, border='#808080', add=TRUE)
  ##points(companies[,c(1,2)], add=TRUE)
