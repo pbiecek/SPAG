@@ -5,10 +5,10 @@
 #'
 #' @docType data
 #' @keywords datasets
-#' @name ShapefilePoland
-#' @usage ShapefilePoland
+#' @name MapPoland
+#' @usage MapPoland
 #'
-#' @format \code{ShapefilePoland} is a \code{SpatialPolygonsDataFrame} object representing a map of Poland.
+#' @format \code{MapPoland} is a \code{SpatialPolygonsDataFrame} object representing a map of Poland.
 #'
 #' @source \href{http://www.codgik.gov.pl/}{\code{Centralny Osrodek Dokumentacji Geodezyjnej i Kartograficznej}}
 #' @seealso \code{\link{SpatialPolygonsDataFrame}}

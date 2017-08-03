@@ -11,7 +11,6 @@
 #'
 #'
 #'
-#'
 #' @importFrom graphics plot
 #' @importFrom stats dist
 #' @import maptools
@@ -34,13 +33,13 @@
 #' plot(spagIndex, category = "C")
 #' @export
 
-SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, eachArea=FALSE,
-                 companiesProjection, CRSProjection){
+SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, eachArea=FALSE, 
+                 columnAreaName, companiesProjection, CRSProjection){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
   
-  
+
   if(!missing(companiesProjection)){
     companySpatialPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=companiesProjection)
   } else{
@@ -53,7 +52,6 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
       shp <- spTransform(shp, CRSProjection)
       companySpatialPoints <- spTransform(companySpatialPoints, CRSProjection)
       companiesDF[,c(1,2)] <- as.data.frame(companySpatialPoints)
-     # CRSProjection <- CRS(CRSProjection)
     }
     CRSProjection <-CRS(CRSProjection)
   } else {
@@ -64,17 +62,32 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
     result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection)
     return(result)
   } else {
-    przypisanie <- SpatialPoints(companiesDF[,c(1,2)], proj4string=CRSProjection) %over% shp
-    companiesDF <- companiesDF[!is.na(przypisanie$jpt_nazwa_),]
-    przypisanie <- przypisanie[!is.na(przypisanie$jpt_nazwa_),]
-    nazwyRegionow <- shp@data$jpt_nazwa_
-    listaFinalna <- list()
-    for (i in 1:length(nazwyRegionow)){
-      daneTestowe <- companiesDF[przypisanie$jpt_nazwa_==nazwyRegionow[i],]
-      shpTest <- SpatialPolygonsDataFrame(SpatialPolygons(list(shp@polygons[[i]]),proj4string = CRSProjection),shp@data[i,])
-      listaFinalna[[as.character(nazwyRegionow[i])]] <- SPAGSingle(daneTestowe,shpTest,theoreticalSample, empiricalSample, numberOfSamples,CRSProjection)
+    
+    # Error handling for calculating SPAG in each area
+    if(missing(columnAreaName)){
+      stop("eachArea was selected, but columnAreaName was not provided")
     }
-    return(listaFinalna)
+    if(! columnAreaName %in% names(shp)){
+      stop("Provided columnAreaName was not found in the map file.")
+    }
+    
+    # Preparing regions to be analysed
+    companiesPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=CRSProjection) %over% shp
+    companiesDF <- companiesDF[!is.na(companiesPoints[[columnAreaName]]),] #jpt_nazwa_
+    companiesPoints <- companiesPoints[!is.na(companiesPoints[[columnAreaName]]),]
+    regionNames <- shp@data[[columnAreaName]]
+    finalList <- list()
+    
+    # calculating SPAG for each area
+    for (i in 1:length(regionNames)){
+      daneTestowe <- companiesDF[companiesPoints[[columnAreaName]]==regionNames[i],]
+      if(nrow(daneTestowe)){
+      shpTest <- SpatialPolygonsDataFrame(SpatialPolygons(list(shp@polygons[[i]]),proj4string = CRSProjection),shp@data[i,])
+      finalList[[as.character(regionNames[i])]] <- SPAGSingle(daneTestowe,shpTest,theoreticalSample, empiricalSample, numberOfSamples,CRSProjection)
+      }
+    }
+    
+    return(finalList)
   }
   
 }
@@ -223,7 +236,7 @@ calcCircles <- function(region,companiesDF,categories, CRSProjection){
                              })
   
   radiusVectorTotal <-sqrt(companiesDF[,3])*rBaseTotal
-  
+
   vectorOfRadius <- sqrt(companiesDF[,3])*baseRadiusVector
   
   # Currently I assume the points in the data frame are traditional coordinates:
@@ -327,8 +340,6 @@ ggplot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE
 
 plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
   
-  currentMargain <- par()$mar
-  
   if(category=="Total"){
     companies <- attr(x,"companies")
   } else {
@@ -340,17 +351,16 @@ plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
   } else {
     polygonArea <- attr(x,"circles")[[category]]
   }
+
+  xmin <- min(attr(x,"map")@bbox[1,1], polygonArea@bbox[1,1])
+  xmax <- max(attr(x,"map")@bbox[1,2], polygonArea@bbox[1,2])
+  ymin <- min(attr(x,"map")@bbox[2,1], polygonArea@bbox[2,1])
+  ymax <- max(attr(x,"map")@bbox[2,2], polygonArea@bbox[2,2])
   
-  par(mar = rep(0, 4)) # not working correctly
-  plot(polygonArea, col='#808080')
+  plot(polygonArea, col='#808080', xlim=c(xmin, xmax), ylim=c(ymin, ymax))
   plot(attr(x,"map"), border='#808080', add=TRUE)
-  
- #plot(x@unionAreaList[["Total"]])
- #plot(x@map, border='#808080', add=TRUE)
- ##points(companies[,c(1,2)], add=TRUE)
+
  if(addCompanies){points(companies[,c(1,2)],pch=16,cex=0.2)}
-  
- par(mar=currentMargain)
 }
 
 #' @export
