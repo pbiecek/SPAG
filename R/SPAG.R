@@ -34,7 +34,7 @@
 #' @export
 
 SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, eachArea=FALSE, 
-                 columnAreaName, companiesProjection, CRSProjection){
+                 columnAreaName, companiesProjection, CRSProjection, totalOnly=FALSE){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
@@ -59,7 +59,7 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
   }
   
   if(!eachArea){
-    result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection)
+    result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection, totalOnly)
     return(result)
   } else {
     
@@ -83,7 +83,8 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
       daneTestowe <- companiesDF[companiesPoints[[columnAreaName]]==regionNames[i],]
       if(nrow(daneTestowe)){
       shpTest <- SpatialPolygonsDataFrame(SpatialPolygons(list(shp@polygons[[i]]),proj4string = CRSProjection),shp@data[i,])
-      finalList[[as.character(regionNames[i])]] <- SPAGSingle(daneTestowe,shpTest,theoreticalSample, empiricalSample, numberOfSamples,CRSProjection)
+      finalList[[as.character(regionNames[i])]] <- SPAGSingle(daneTestowe,shpTest,theoreticalSample, empiricalSample,
+                                                              numberOfSamples, CRSProjection, totalOnly)
       }
     }
     
@@ -93,113 +94,112 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
 }
 
 
-SPAGSingle <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, CRSProjection){
+SPAGSingle <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, CRSProjection,
+                       totalOnly){
   
   # Calculating the coverage part of SPAG index:
+  
+  circles <-calcCircles(shp,companiesDF, CRSProjection, totalOnly)
+  CirclesUnionCategory <- list()
+  circlesList <- list()
+  
   categories <- unique(companiesDF[,4])
   
-  circles <-calcCircles(shp,companiesDF,categories, CRSProjection)
+  if(!totalOnly){
   circlesList <- lapply(categories,
                         function(x){
                           circles$Categories[companiesDF[,4]==x]
                         })
 
-  # One of the most intensive part - calculating the union for categories and total
   CirclesUnionCategory <- lapply(categories,
                                  function(x){
                                    unionArea <- gUnaryUnion(circles$Categories[companiesDF[,4]==x])
                                    unionArea
                                  })
+  
   for (i in 1:length(CirclesUnionCategory)){
     CirclesUnionCategory[[i]]@polygons[[1]]@ID <- as.character(i)
   }
+  
   circlesList <- setNames(circlesList, categories)
-  CirclesUnionTotal <- gUnaryUnion(circles$Total)
+  
   circlesListTotal <- SpatialPolygons(lapply(CirclesUnionCategory, function(x){x@polygons[[1]]}))
   CirclesUnionCategoryArea <- lapply(CirclesUnionCategory, function(x){
     gArea(x)
   })
   
-  CirclesUnionTotalArea <- gArea(CirclesUnionTotal)
   names(CirclesUnionCategory) <- categories
+  
+  }
+  # One of the most intensive part - calculating the union for categories and total
+
+  CirclesUnionTotal <- gUnaryUnion(circles$Total)
+  CirclesUnionTotalArea <- gArea(CirclesUnionTotal)
+  
   CirclesUnionCategory$Total <- CirclesUnionTotal
   circlesList$Total <- circles$Total
+  
   # Calculating the indexes
-  IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea)
-  ICov <- calcCoverageIndex(companiesDF[,c(3, 4)], categories)
-  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], shp, categories,theoreticalSample, empiricalSample, numberOfSamples)
+  IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea, totalOnly)
+  ICov <- calcCoverageIndex(companiesDF[,c(3, 4)], categories, totalOnly)
+  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], shp, categories,theoreticalSample, empiricalSample, numberOfSamples, totalOnly)
   ISPAG = IDist*IOver*ICov
   
-  categories <- c(as.character(categories), "Total")
+  if(!totalOnly){
+  categories <- c(as.character(categories), "Total") } else { categories <- "Total" }
   names(companiesDF) <- c("long","lat","emp", "categories")
   
   IndexDF <- data.frame(categories,IDist, IOver,ICov,ISPAG)
   companyList <- list(companies = companiesDF)
-  
- #x <- list( SPAGIndex = IndexDF)
- #print(class(companiesDF))
-  #x@map = region
-  #class(x) <- "SPAG"
-  #setClass("SPAG", slots=c(map="SpatialPolygonsDataFrame", unionAreaList="list", companies="data.frame"))
-  #x <- new("SPAG", map=region, unionAreaList = CirclesUnionCategory, companies = companiesDF)
-  #options(warn = currentWarning)
-  #slot(x, "map") <- region
-  
- # x <- list( map = region , unionAreaList = CirclesUnionCategory, companies = companiesDF, SPAGIndex = IndexDF)
-  #class(x) <- "SPAG"
-  
-#  x <- list(SPAGIndex = IndexDF)
-#  class(x) <- "SPAG"
-#  
-#  attr(x, "map") <- region
-#  attr(x, "unionAreaList") <- CirclesUnionCategory
-#  attr(x, "companies") <- companiesDF
- # setClass("SPAG", representation(map="SpatialPolygonsDataFrame", unionAreaList="list", companies="data.frame", SPAGIndex ="data.frame", circles="list"))
-# x <- new("SPAG",  map=shp, unionAreaList = CirclesUnionCategory, companies = companiesDF, SPAGIndex = IndexDF, circles=circlesList)
+
   x <- IndexDF
   attr(x, "IndexDF") <- IndexDF
   attr(x, "map") <- shp
   attr(x, "unionAreaList") <- CirclesUnionCategory
   attr(x, "companies") <- companiesDF
   attr(x, "circles") <-circlesList
- # setOldClass("data.frame")
   class(x) <- "SPAG"
   
   return(x);
 }
 
-calcCoverageIndex <- function(employmentCategoryDF, categories){
+calcCoverageIndex <- function(employmentCategoryDF, categories, totalOnly){
   # This data frame consists of two columns - the first with information about employment and the second one with categories
-  totalEmployment <- sum(employmentCategoryDF[,1])
-  ICov <- sapply(categories,
-                 function(x){
+  if(!totalOnly){
+    totalEmployment <- sum(employmentCategoryDF[,1])
+    ICov <- sapply(categories, function(x){
                    return (sum(employmentCategoryDF[employmentCategoryDF[,2]==x,1])/totalEmployment)
                  })
-  return(c(ICov,1))
+  return(c(ICov,1))} else {return(1)}
 }
 
-calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSample, empiricalSample, numberOfSamples){
+calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSample, empiricalSample, numberOfSamples, 
+                              totalOnly){
+  
   IDistFULL <- vector(mode="numeric", length=0)
   
   for (i in 1:numberOfSamples){
-  IDist<- sapply(categories,
-                 function(x){
-                   n <- nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,])
-                   if(n>1){
-                   nCompanies <- min(theoreticalSample,n)
-                   theoreticalCompanies <- spsample(region, nCompanies, type="regular", offset = c(0,0))
-                   theoreticalDF <- as.data.frame(theoreticalCompanies)
-                   theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
-                   
-                   nCompanies <- min(empiricalSample,n)
-                   index<-sample(1:n, nCompanies, replace = FALSE)
-                   companiesChoose = coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)]
-                   meanDist <- mean(dist(as.matrix(companiesChoose[index,])))/mean(theoreticalDist)
-                   if (is.finite(meanDist)){
-                     return(meanDist)
-                   } else return(0)
-                   } else return(0)
-                 })
+    if(!totalOnly){
+      IDist<- sapply(categories,
+                     function(x){
+                       n <- nrow(coordsCategoryDF[coordsCategoryDF[,3] == x,])
+                       if(n>1){
+                       nCompanies <- min(theoreticalSample,n)
+                       theoreticalCompanies <- spsample(region, nCompanies, type="regular", offset = c(0,0))
+                       theoreticalDF <- as.data.frame(theoreticalCompanies)
+                       theoreticalDist<-dist(as.matrix(theoreticalCompanies@coords))
+                       
+                       nCompanies <- min(empiricalSample,n)
+                       index<-sample(1:n, nCompanies, replace = FALSE)
+                       companiesChoose = coordsCategoryDF[coordsCategoryDF[,3]==x,c(1,2)]
+                       meanDist <- mean(dist(as.matrix(companiesChoose[index,])))/mean(theoreticalDist)
+                       if (is.finite(meanDist)){
+                         return(meanDist)
+                       } else return(0)
+                       } else return(0)
+                     })
+    }
+    
   n <- nrow(coordsCategoryDF)
   nCompanies <- min(theoreticalSample,n)
   theoreticalCompanies <- spsample(region, nCompanies, type="regular")
@@ -209,35 +209,38 @@ calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSa
   nCompanies <- min(empiricalSample,n)
   index<-sample(1:n, nCompanies, replace = FALSE)
   IDistTotal <-  mean(dist(as.matrix(coordsCategoryDF[index,c(1,2)])))/mean(theoreticalDist)
-  IDistFULL <- rbind(IDistFULL, c(IDist,IDistTotal))
+  
+  if(!totalOnly){IDistFULL <- rbind(IDistFULL, c(IDist,IDistTotal))}else {IDistFULL <- rbind(IDistFULL,IDistTotal) }
   }
   return(apply(IDistFULL,2,mean))
 }
 
-calcCircles <- function(region,companiesDF,categories, CRSProjection){
+calcCircles <- function(region,companiesDF, CRSProjection, totalOnly){
   # Calculating base radius for other indexes
   # In order to do so I change the CRS to a system in which the area is not showed in degrees
   # as circles in those coordinates are oblate ellipses.
  # if(is(region,"SpatialPolygonsDataFrame")){
     area <- rgeos::gArea(region)
-#} else {
-#    area <- region@area
-#  }
-  rBase <- sapply(categories,
-                  function(x){
-                    return (sqrt(area/(sum(companiesDF[companiesDF[,4]==x,3])*pi)))
-                  })
+    
+    if(!totalOnly){
+      categories <- unique(companiesDF[,4])
+  
+      rBase <- sapply(categories,
+                    function(x){
+                      return (sqrt(area/(sum(companiesDF[companiesDF[,4]==x,3])*pi)))
+                    })
+      rBaseDF <- data.frame(rBase, names=categories)
+      
+      baseRadiusVector <- sapply(companiesDF[,4],
+                                 function(x){
+                                   rBaseDF[rBaseDF$names==x,]$rBase
+                                 })
+      vectorOfRadius <- sqrt(companiesDF[,3])*baseRadiusVector
+    }
+    
   rBaseTotal <- sqrt(area/(sum(companiesDF[,3])*pi))
-  rBaseDF <- data.frame(rBase, names=categories)
-  
-  baseRadiusVector <- sapply(companiesDF[,4],
-                             function(x){
-                               rBaseDF[rBaseDF$names==x,]$rBase
-                             })
-  
   radiusVectorTotal <-sqrt(companiesDF[,3])*rBaseTotal
 
-  vectorOfRadius <- sqrt(companiesDF[,3])*baseRadiusVector
   
   # Currently I assume the points in the data frame are traditional coordinates:
 
@@ -248,16 +251,22 @@ calcCircles <- function(region,companiesDF,categories, CRSProjection){
   # xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
   
   # New circles will appear as circluar in plot
+  if (!totalOnly){
   return(list("Categories" = gBuffer(xySP, quadsegs=50, byid=TRUE, width=vectorOfRadius),
               "Total" = gBuffer(xySP, quadsegs=50, byid=TRUE, width=radiusVectorTotal)))
+  } else {
+    return(list("Total" = gBuffer(xySP, quadsegs=50, byid=TRUE, width=radiusVectorTotal)))
+  }
 }
 
-calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea){
-  IOver <- mapply(function(x,y){
+calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea, totalOnly){
+  
+  if(!totalOnly){IOver <- mapply(function(x,y){
     y /gArea(circles$Categories[companiesDF[,4]==x])
   },categories,CirclesUnionCategoryArea)
   
   IOver <- c(IOver, CirclesUnionTotalArea/gArea(circles$Total))
+  } else {IOver <- CirclesUnionTotalArea/gArea(circles$Total) }
   
   return(IOver)
 }

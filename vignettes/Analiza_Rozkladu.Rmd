@@ -1,0 +1,132 @@
+---
+title: "Analiza Rozk³adu SPAG"
+author: "Maksymilian Mazur"
+date: "6 sierpnia 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Wstêp
+
+Mnogoœæ danych mikro-geograficznych pozwala na stosowanie znacznie szerszego wahlarza metod analizy w celu osi¹gniêcia znacz¹cych wniosków. Posiadaj¹c dane przestrzenne na zadanym przedziale czasu dotycz¹ce pewnego zjawiska mo¿na modelowaæ te wielkoœci jako pewn¹ realizacjê stochastycznego procesu punktowego. Takie podejœcie stosowane by³o ju¿ m. in. w analizie rozwoju lasu, a tak¿e stanowi podstawê teoretyczn¹ w dalszej analizie.
+
+TBD
+
+# Konstrukcja teoretyczna indeksu
+
+TBD
+
+# Opis Kolejnych Indeksów
+
+TBD
+
+# Konstrukcja teoretyczna indeksu
+
+Korzystaj¹c z postaci indeksu SPAG jako iloczynu trzech cz³onów mo¿na uproœciæ jego postaæ:
+
+$$I_{SPAG} = I_{o}\cdot I_{c} \cdot I_{d} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{\sum\limits_{i=1}^{n} |P_i|} \cdot \frac{ \sum\limits_{i=1}^{n} |P_i|}{|P|} \cdot I_{d} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{|P|} \cdot I_{d}$$
+
+interpertuj¹c powstawanie i rozwój firm jako pewien proces stochastyczny, a tak¿e oznaczaj¹c
+
+$$I_{co} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{|P|}$$
+otrzymujê, ¿e indeks SPAG jest iloczynem dwóch zmiennych losowych.
+Za³ó¿my, ¿e $I_{co}$ ma rozk³ad beta o gêstoœci:
+$$f_{I_{co}}(x) = \frac{x^{a-1}(1-x)^{b-1}}{B(a,b)}$$
+zaœ $I_{d}$ rozk³ad gamma o gêstoœci:
+$$f_{I_d} (x) = \frac{ \lambda^{\beta} x^{\beta - 1} e^{-\lambda x} }{\Gamma (\beta)}$$
+
+Parametry rozk³adu gamma zostan¹ wyliczone korzystaj¹c z nastêpuj¹cych estymatorów:
+
+$$\hat{\beta} = \frac{\mu^2}{\sigma^2}$$
+$$\hat{\lambda} = \frac{\mu}{\sigma^2}$$
+
+gdzie $\mu$ i $\sigma^2$, to odpowiednio wartoœæ oczekiwana i wariancja zmiennej losowej $I_d$ o rozk³adzie $\Gamma (\beta, \lambda)$.
+
+Parametry rozk³adu beta wyznaczane s¹ ze wzorów:
+
+$$\hat{\alpha} = \left( \frac{1-\mu}{\sigma^2}-\frac{1}{\mu} \right) \cdot \mu^2$$
+
+$$\hat{\beta} = \hat{\alpha} \cdot \left(\frac{1}{\mu}-1 \right)$$
+
+
+# Eksperyment
+
+Indeks SPAG mo¿na traktowaæ jako zmienn¹ losow¹, której rozk³ad zale¿y od obszaru na którym jest liczona. W poni¿szym eksperymencie bêdzie on liczony dla województwa lubelskiego. W celu otrzymania próbki o wystarczaj¹cym rozmiarze dane wejœciowe zosta³y dziesiêciokrotnie podzielone na zestawy po 500 firm, na którym wywo³ywana zosta³a funkcja SPAG.
+
+Zaimplementowana w pakiecie metoda zwraca zarówno wyliczon¹ wartoœæ $I_{d}$ jak i uniê kó³ bêd¹cych graficzn¹ interpretacj¹ indeksu SPAG na podstawie, których mo¿na wyznaczyæ wartoœci cz³onu $I_{co}$:
+
+```{r eval=FALSE}
+setwd("C:/Users/Max/Desktop/MGR_ROZNE/SPAGstarerepo/SPAG/materials/aglomeracja/")
+data<-read.csv("geoloc data.csv", header=TRUE, sep=";", dec=".")
+data$zatr<-ifelse(data$GR_LPRAC==1, 5, ifelse(data$GR_LPRAC==2, 30, ifelse(data$GR_LPRAC==3,150, ifelse(data$GR_LPRAC==4, 600, 1500))))
+TestCompanies <- data[,c(23,24,25,12)]
+n <- nrow(TestCompanies)
+
+MapDF <- as.data.frame(MapPoland)
+lubelskie <- MapPoland[MapDF$jpt_nazwa_=="lubelskie",]
+
+final <- c()
+for(i in 1:10){
+  samples <- split(sample(1:n),  rep(1:(n/500+1), each=500))
+  ns <- length(samples)
+  
+  ee <- sapply(1:ns,function(i){
+    t <- TestCompanies[samples[[i]],]
+    r <- SPAG(t,lubelskie)
+    IDist <- tail(r$IDist,1)
+    unionCirc <- attr(r, "unionAreaList")
+    return(c(IDist,gArea(unionCirc$Total)))
+  })
+  ee <- t(ee)
+  final <- rbind(final, ee)
+}
+
+final[,2] <- final[,2]/gArea(lubelskie)
+```
+
+
+Do sprawdzenia czy zmienne pochodz¹ z odpowiednich rozk³adów skorzystam z testu Ko³mogorova-Smirnova:
+
+
+```{r }
+load('C:/Users/Max/Desktop/AnalizaRozkladu/final.rda')
+
+varGamma <- var(final[,1])
+eGamma <- mean(final[,1])
+
+
+# dla rozk³adu gamma:
+
+wspBeta = eGamma^2/varGamma # shape
+wspLambda = eGamma/varGamma # rate
+
+ks.test(final[,1], "pgamma",wspBeta,wspLambda, exact=TRUE)
+
+print("wysokie p-value sugeruje, ¿e rozk³ad zosta³ dobrze dobrany")
+hist(final[,1],freq=F, xlab="Distance Index", main="Gamma Distribution")
+curve( dgamma(x, shape=wspBeta,rate=wspLambda),0.84, 0.96, add=T, col="blue")
+
+```
+
+
+```{r}
+
+varBeta <- var(final[,2])
+eBeta <- mean(final[,2])
+
+alfa = ((1-eBeta)/varBeta-1/eBeta)*eBeta^2
+beta = alfa*(1/eBeta-1)
+
+ks.test(final[,2], "pbeta",beta,alfa)
+print("niskie p-value sugeruje, ¿e rozk³ad jest z³y")
+
+hist(final[,2],freq=F, ylim=c(0,20), xlab="CO Index", main="Beta Distribution" )
+curve( dbeta(x, shape1=alfa, shape2=beta),0.40, 0.6, add=T, col="blue")
+```
+
+
+
+
