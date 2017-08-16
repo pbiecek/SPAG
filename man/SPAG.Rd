@@ -6,7 +6,7 @@
 \usage{
 SPAG(companiesDF, shp, theoreticalSample = 1000, empiricalSample = 1000,
   numberOfSamples = 1, eachArea = FALSE, columnAreaName,
-  companiesProjection, CRSProjection)
+  companiesProjection, CRSProjection, totalOnly = FALSE)
 }
 \arguments{
 \item{companiesDF}{- data frame with information regarding the companies. The data frame needs four columns:
