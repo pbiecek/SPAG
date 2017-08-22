@@ -1,3 +1,7 @@
+#' @useDynLib SPAG
+#' @importFrom Rcpp sourceCpp
+NULL
+
 #' Function calculating the coverage, distance and overlap components of the SPAG Index.
 #'
 #' @param companiesDF - data frame with information regarding the companies. The data frame needs four columns:
@@ -184,8 +188,10 @@ calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSa
                        if(n>1){
                          nCompanies <- min(theoreticalSample,n)
                          theoreticalCompanies <- spsample(region, nCompanies, type="regular", offset = c(0,0))
-                         theoreticalDF <- as.data.frame(theoreticalCompanies)
-                         theoreticalDist<-mean(dist(as.matrix(theoreticalCompanies@coords)))
+                         theoreticalDF <- as.matrix(as.data.frame(theoreticalCompanies))
+                         theoreticalDist <- mean(dist(theoreticalDF))
+                         theoreticalDist <- avgDist(theoreticalDF)
+
                          
                          nCompanies <- min(empiricalSample,n)
                          meanDist <- numeric(0)

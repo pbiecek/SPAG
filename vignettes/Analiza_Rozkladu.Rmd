@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Wstêp
 
-Mnogoœæ danych mikro-geograficznych pozwala na stosowanie znacznie szerszego wahlarza metod analizy w celu osi¹gniêcia znacz¹cych wniosków. Posiadaj¹c dane przestrzenne na zadanym przedziale czasu dotycz¹ce pewnego zjawiska mo¿na modelowaæ te wielkoœci jako pewn¹ realizacjê stochastycznego procesu punktowego. Takie podejœcie stosowane by³o ju¿ m. in. w analizie rozwoju lasu, a tak¿e stanowi podstawê teoretyczn¹ w dalszej analizie.
+Mnogoœæ danych mikro-geograficznych pozwala na stosowanie znacznie szerszego wahlarza metod analizy w celu osi¹gniêcia znacz¹cych wniosków. Posiadaj¹c dane przestrzenne na zadanym przedziale czasu dotycz¹ce pewnego zjawiska, mo¿na modelowaæ te wielkoœci jako pewn¹ realizacjê stochastycznego procesu punktowego. Takie podejœcie stosowane by³o ju¿ m. in. w analizie rozwoju lasu, a tak¿e stanowi podstawê teoretyczn¹ w dalszej analizie.
 
 TBD
 
