@@ -25,25 +25,25 @@ TBD
 
 # Konstrukcja teoretyczna indeksu
 
-Korzystaj¹c z postaci indeksu SPAG jako iloczynu trzech cz³onów mo¿na uproœciæ jego postaæ:
+Korzystaj¹c z postaci indeksu SPAG jako iloczynu trzech cz³onów, mo¿na uproœciæ jego postaæ:
 
 $$I_{SPAG} = I_{o}\cdot I_{c} \cdot I_{d} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{\sum\limits_{i=1}^{n} |P_i|} \cdot \frac{ \sum\limits_{i=1}^{n} |P_i|}{|P|} \cdot I_{d} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{|P|} \cdot I_{d}$$
 
 interpertuj¹c powstawanie i rozwój firm jako pewien proces stochastyczny, a tak¿e oznaczaj¹c
 
-$$I_{co} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{|P|}$$
+$$I_{co} = \frac{| \bigcup\limits_{i=1}^{n} P_{i} | }{|P|}$$,
 otrzymujê, ¿e indeks SPAG jest iloczynem dwóch zmiennych losowych.
 Za³ó¿my, ¿e $I_{co}$ ma rozk³ad beta o gêstoœci:
 $$f_{I_{co}}(x) = \frac{x^{a-1}(1-x)^{b-1}}{B(a,b)}$$
 zaœ $I_{d}$ rozk³ad gamma o gêstoœci:
 $$f_{I_d} (x) = \frac{ \lambda^{\beta} x^{\beta - 1} e^{-\lambda x} }{\Gamma (\beta)}$$
 
-Parametry rozk³adu gamma zostan¹ wyliczone korzystaj¹c z nastêpuj¹cych estymatorów:
+Parametry rozk³adu gamma zostan¹ wyliczone, korzystaj¹c z nastêpuj¹cych estymatorów:
 
 $$\hat{\beta} = \frac{\mu^2}{\sigma^2}$$
 $$\hat{\lambda} = \frac{\mu}{\sigma^2}$$
 
-gdzie $\mu$ i $\sigma^2$, to odpowiednio wartoœæ oczekiwana i wariancja zmiennej losowej $I_d$ o rozk³adzie $\Gamma (\beta, \lambda)$.
+gdzie $\mu$ i $\sigma^2$ to odpowiednio wartoœæ oczekiwana i wariancja zmiennej losowej $I_d$ o rozk³adzie $\Gamma (\beta, \lambda)$.
 
 Parametry rozk³adu beta wyznaczane s¹ ze wzorów:
 
@@ -54,9 +54,9 @@ $$\hat{\beta} = \hat{\alpha} \cdot \left(\frac{1}{\mu}-1 \right)$$
 
 # Eksperyment
 
-Indeks SPAG mo¿na traktowaæ jako zmienn¹ losow¹, której rozk³ad zale¿y od obszaru na którym jest liczona. W poni¿szym eksperymencie bêdzie on liczony dla województwa lubelskiego. W celu otrzymania próbki o wystarczaj¹cym rozmiarze dane wejœciowe zosta³y dziesiêciokrotnie podzielone na zestawy po 500 firm, na którym wywo³ywana zosta³a funkcja SPAG.
+Indeks SPAG mo¿na traktowaæ jako zmienn¹ losow¹, której rozk³ad zale¿y od obszaru, na którym jest liczona. W poni¿szym eksperymencie bêdzie on liczony dla województwa lubelskiego. W celu otrzymania próbki o wystarczaj¹cym rozmiarze dane wejœciowe zosta³y dziesiêciokrotnie podzielone na zestawy po 500 firm, na których wywo³ana zosta³a funkcja SPAG.
 
-Zaimplementowana w pakiecie metoda zwraca zarówno wyliczon¹ wartoœæ $I_{d}$ jak i uniê kó³ bêd¹cych graficzn¹ interpretacj¹ indeksu SPAG na podstawie, których mo¿na wyznaczyæ wartoœci cz³onu $I_{co}$:
+Zaimplementowana w pakiecie metoda zwraca zarówno wyliczon¹ wartoœæ $I_{d}$ jak i uniê kó³ bêd¹cych graficzn¹ interpretacj¹ indeksu SPAG, na podstawie których mo¿na wyznaczyæ wartoœci cz³onu $I_{co}$:
 
 ```{r eval=FALSE}
 setwd("C:/Users/Max/Desktop/MGR_ROZNE/SPAGstarerepo/SPAG/materials/aglomeracja/")

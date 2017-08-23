@@ -12,6 +12,7 @@ NULL
 #' uniform distribution.
 #' @param empiricalSample - number of companies used for the estimation of the average distance between companeis for which
 #' the distance index is being calculated.
+#' @param numberOfSamples - 
 #'
 #'
 #'
@@ -37,8 +38,8 @@ NULL
 #' plot(spagIndex, category = "C")
 #' @export
 
-SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, eachArea=FALSE, 
-                 columnAreaName, companiesProjection, CRSProjection, totalOnly=FALSE){
+SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, columnAreaName, 
+                 companiesProjection, CRSProjection, totalOnly=FALSE){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
@@ -62,15 +63,12 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
     CRSProjection <- shp@proj4string
   }
   
-  if(!eachArea){
+  if(missing(columnAreaName)){
     result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection, totalOnly)
     return(result)
   } else {
     
     # Error handling for calculating SPAG in each area
-    if(missing(columnAreaName)){
-      stop("eachArea was selected, but columnAreaName was not provided")
-    }
     if(! columnAreaName %in% names(shp)){
       stop("Provided columnAreaName was not found in the map file.")
     }
@@ -191,7 +189,6 @@ calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSa
                          theoreticalDF <- as.matrix(as.data.frame(theoreticalCompanies))
                          theoreticalDist <- mean(dist(theoreticalDF))
                          theoreticalDist <- avgDist(theoreticalDF)
-
                          
                          nCompanies <- min(empiricalSample,n)
                          meanDist <- numeric(0)
@@ -258,8 +255,8 @@ calcCircles <- function(region,companiesDF, CRSProjection, totalOnly){
   
   # Currently I assume the points in the data frame are traditional coordinates:
 
-  xySP <- SpatialPoints(companiesDF[,c(1,2)]) #SpatialPoints(companiesDF[,c(1,2)], proj4string=CRSProjection) - dodanie projekcji wykrzywia kó³ka
-
+  xySP <- SpatialPoints(companiesDF[,c(1,2)])
+  
   # Transforming the coordinates to be in the same system as the shapefile
   # newCoordinateSystem<-"+proj=longlat +datum=WGS84"
   # xySP2 <- spTransform(xySP, CRS(newCoordinateSystem))
@@ -285,6 +282,7 @@ calcOverlapIndex <- function(circles, companiesDF, categories, CirclesUnionCateg
   return(IOver)
 }
 
+#' @export
 ggplot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
   
   currentWarning <- getOption("warn")
@@ -330,6 +328,7 @@ ggplot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE
   mapPlot
 }
 
+#' @export
 plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
   
   if(category=="Total"){

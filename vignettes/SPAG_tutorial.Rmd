@@ -40,8 +40,8 @@ library("SPAG")
 In order to calculate the SPAG Index two arguments have to be provided - information about the area and companies for which the index is supposed to be calculated. The area should be provided as a SpatialPolygonsDataFrame. An exemplary map in the format of a SpatialPolygonsDataFrame is provided with the package:
 
 ```{r eval=FALSE}
-?ShapefilePoland
-ShapefilePoland
+?MapPoland
+MapPoland
 ```
 
 The information about the companies should be provided in the form of a data frame with four columns: the geographical coordinates of the companies (longitude and latitute), the number of people working for the company (numeric) and a categorical value defining the field of work of the company. A data frame with such data is provided in the package:
@@ -55,7 +55,7 @@ head(CompaniesPoland)
 
 The package implements function SPAG responsible for calculating the index along with its components. The function takes up to 8 parameters - but only the data frame with companies and a spatial data frame with the map is necessary. The additional parameters are:
 	
-* **companiesProjection - by default the function assumes that the geographical coordinates in the data frame with information about the companies is given in the same projection as the map. If the map is given in other projection, then this string argument modifies the data frame accordingly.
+* **companiesProjection** - by default the function assumes that the geographical coordinates in the data frame with information about the companies is given in the same projection as the map. If the map is given in other projection, then this string argument modifies the data frame accordingly.
 
 * **CRSProjection** - this string argument modifies the geographical coordinates of the map and data frame.
 
@@ -65,12 +65,19 @@ The package implements function SPAG responsible for calculating the index along
 
 * **numberOfSamples** - in order to improve the accuracy of the calculated distance index boosting is applied. The numberOfSamples defines how many times the distance index should be calculated (to get the average of results).
 
-* **eachArea** - by default the SPAG index is calculated for the whole area. This can be changed by setting this parameter to true - if so the index is calculated for each area within the spatial data frame separately.
+* **columnAreaName** - by default the SPAG index is calculated for the whole area but the index can be also calculated for each area within the spatial data frame separately. In order to enable such calculation the name of the column which specifies the names of subareas should be specified.
+
+* **companiesProjection** - by default the data frame with information about the companies uses the same projection as the map. If this is not the case this parameter will be used to set a different projection.
+
+* **CRSProjection** - the projection of the map determines the way the map will be plotted. This parameter is used to change this projection.
+
+* **totalOnly** - by default SPAG functions calculates the index for each category as well as the total. This can be changed by setting this parameter to TRUE.
+
 
 
 ```{r, message=FALSE, warning=FALSE}
 # ?SPAG
-SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=200)
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, theoreticalSample=100, empiricalSample=200)
 print(SPAGIndex)
 ```
 
@@ -83,26 +90,26 @@ The SPAG function returns an SPAG object: a dataframe containing SPAG index and 
 #CompaniesPoland<-dane[dane$SEK_PKD7 %in% c("B","C","D","E"), c(23,24,25,26) ]
 ```
 
-The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time and space complexity of $O(n^2)$. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:
+The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time of $O(n^2)$. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:
 
 ```{r, message=FALSE, warning=FALSE}
 startTime <- Sys.time()
-SPAGIndexFULL <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=10000, empiricalSample=10000)
+SPAGIndexFULL <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, theoreticalSample=10000, empiricalSample=10000)
 endTime <- Sys.time()
 print(SPAGIndexFULL)
 print(endTime-startTime)
 
 startTime <- Sys.time()
-SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100)
+SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, theoreticalSample=100, empiricalSample=100)
 endTime <- Sys.time()
 print(SPAGIndexSAM)
 print(endTime-startTime)
 ```
 
-Parameter numberOfSamples defines the number of times the distance index will be calculated. This increases the total time of calculations but results in more accurate result
+Parameter **numberOfSamples** defines the number of times the distance index will be calculated. This increases the total time of calculations but gives more accurate results:
 ```{r, message=FALSE, warning=FALSE}
 startTime <- Sys.time()
-SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100,
+SPAGIndexSAM <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, theoreticalSample=100, empiricalSample=100,
                      numberOfSamples=1)
 endTime <- Sys.time()
 print(SPAGIndexSAM)
@@ -112,10 +119,10 @@ print(endTime-startTime)
 The SPAG function also provides a method for calculating the SPAG Index with regards to regions, which simplifies the analysis:
 
 ```{r, message=FALSE, warning=FALSE}
-SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, theoreticalSample=100, empiricalSample=100,
-                     numberOfSamples=1, eachArea = TRUE)
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, theoreticalSample=100, empiricalSample=100, numberOfSamples=1, columnAreaName = "jpt_nazwa_")
 SPAGIndex
 ```
+
 ## Plotting the Index
 
 SPAG package allows plotting the index using innate plot functions as well as the `ggplot2` and `ggmap` packages. The first just prints out the map with circles:
@@ -149,7 +156,7 @@ plot.SPAG = function(x, category="Total", addCompanies=TRUE, circleUnion=FALSE){
 ```
 
 ```{r}
-SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland)
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland)
 plot(SPAGIndex)
 ```
 
@@ -187,6 +194,6 @@ ggSPAG + coord_map("conic", lat=20) + coord_flip()
 
 Instead of manipulating with the map after calculating the SPAG Index it is possible to change the coordinates of the map and companies before the calculation. This functionality is provided with the parameter CRSProjection:
 ```{r}
-SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = ShapefilePoland, CRSProjection="+proj=longlat +datum=WGS84")
+SPAGIndex <- SPAG(companiesDF = CompaniesPoland, shp = MapPoland, CRSProjection="+proj=longlat +datum=WGS84")
 ggplot(SPAGIndex)
 ```

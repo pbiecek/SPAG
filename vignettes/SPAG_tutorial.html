@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-06-01" />
+<meta name="date" content="2017-08-24" />
 
 <title>SPAG package tutorial (vignette)</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">SPAG package tutorial (vignette)</h1>
-<h4 class="date"><em>2017-06-01</em></h4>
+<h4 class="date"><em>2017-08-24</em></h4>
 
 
 <div id="TOC">
@@ -95,8 +95,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="data-sets" class="section level2">
 <h2>Data sets</h2>
 <p>In order to calculate the SPAG Index two arguments have to be provided - information about the area and companies for which the index is supposed to be calculated. The area should be provided as a SpatialPolygonsDataFrame. An exemplary map in the format of a SpatialPolygonsDataFrame is provided with the package:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?ShapefilePoland
-ShapefilePoland</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?MapPoland
+MapPoland</code></pre></div>
 <p>The information about the companies should be provided in the form of a data frame with four columns: the geographical coordinates of the companies (longitude and latitute), the number of people working for the company (numeric) and a categorical value defining the field of work of the company. A data frame with such data is provided in the package:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ?CompaniesPoland</span>
 <span class="kw">head</span>(CompaniesPoland)</code></pre></div>
@@ -112,30 +112,33 @@ ShapefilePoland</code></pre></div>
 <h2>Calculating the index</h2>
 <p>The package implements function SPAG responsible for calculating the index along with its components. The function takes up to 8 parameters - but only the data frame with companies and a spatial data frame with the map is necessary. The additional parameters are:</p>
 <ul>
-<li><p>**companiesProjection - by default the function assumes that the geographical coordinates in the data frame with information about the companies is given in the same projection as the map. If the map is given in other projection, then this string argument modifies the data frame accordingly.</p></li>
+<li><p><strong>companiesProjection</strong> - by default the function assumes that the geographical coordinates in the data frame with information about the companies is given in the same projection as the map. If the map is given in other projection, then this string argument modifies the data frame accordingly.</p></li>
 <li><p><strong>CRSProjection</strong> - this string argument modifies the geographical coordinates of the map and data frame.</p></li>
 <li><p><strong>theoreticalSample</strong> - the time and space compexity of the algorithm used for calculating the average distance between uniformly distributed companies is too big, therefore a sample of size theoreticalSample is used as an basis for estimating the real theoretical distance. By default the size of the sample is 1000.</p></li>
 <li><p><strong>empiricalSample</strong> - this argument plays the same role as the former one but is used for estimating the real empirical distance.</p></li>
 <li><p><strong>numberOfSamples</strong> - in order to improve the accuracy of the calculated distance index boosting is applied. The numberOfSamples defines how many times the distance index should be calculated (to get the average of results).</p></li>
-<li><p><strong>eachArea</strong> - by default the SPAG index is calculated for the whole area. This can be changed by setting this parameter to true - if so the index is calculated for each area within the spatial data frame separately.</p></li>
+<li><p><strong>columnAreaName</strong> - by default the SPAG index is calculated for the whole area but the index can be also calculated for each area within the spatial data frame separately. In order to enable such calculation the name of the column which specifies the names of subareas should be specified.</p></li>
+<li><p><strong>companiesProjection</strong> - by default the data frame with information about the companies uses the same projection as the map. If this is not the case this parameter will be used to set a different projection.</p></li>
+<li><p><strong>CRSProjection</strong> - the projection of the map determines the way the map will be plotted. This parameter is used to change this projection.</p></li>
+<li><p><strong>totalOnly</strong> - by default SPAG functions calculates the index for each category as well as the total. This can be changed by setting this parameter to TRUE.</p></li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ?SPAG</span>
-SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">200</span>)
+SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">200</span>)
 <span class="kw">print</span>(SPAGIndex)</code></pre></div>
 <pre><code>##       categories     IDist     IOver         ICov       ISPAG
-## gimn.      gimn. 0.5734925 0.2970703 0.2537445603 0.043229845
-## SP            SP 0.6517485 0.3249807 0.4299286509 0.091061324
-## LO            LO 0.5278119 0.2305102 0.1515661370 0.018440450
-## T              T 0.5326555 0.2587197 0.0859857302 0.011849563
+## gimn.      gimn. 0.5730610 0.2970703 0.2537445603 0.043197314
+## SP            SP 0.6394194 0.3249807 0.4299286509 0.089338734
+## LO            LO 0.5402739 0.2305102 0.1515661370 0.018875841
+## T              T 0.5507734 0.2587197 0.0859857302 0.012252617
 ## TU            TU 0.4995209 0.2843701 0.0223914584 0.003180680
 ## LOU          LOU 0.5132446 0.2772326 0.0356745269 0.005076061
 ## LP            LP 0.4967820 0.3036286 0.0206077320 0.003108414
 ## ZZ            ZZ 0.0000000 1.0000000 0.0001012043 0.000000000
-##            Total 0.5545018 0.2396642 1.0000000000 0.132894222</code></pre>
+##            Total 0.6489404 0.2396642 1.0000000000 0.155527769</code></pre>
 <p>The SPAG function returns an SPAG object: a dataframe containing SPAG index and its components calculated for every category as well as the data required for visualizing the index.</p>
-<p>The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time and space complexity of <span class="math inline">\(O(n^2)\)</span>. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:</p>
+<p>The last two parameters - theoreticalSample and empiricalSample limit the number of companies used in the calculation of the Distance Index. This has to be done as the algorithm has time of <span class="math inline">\(O(n^2)\)</span>. For bigger data sets such algorithm would be too time consuming. Below an example of limiting the calculation for a slightly biger data set is shown. As seen only the distance index changes:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">startTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
-SPAGIndexFULL &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">theoreticalSample=</span><span class="dv">10000</span>, <span class="dt">empiricalSample=</span><span class="dv">10000</span>)
+SPAGIndexFULL &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">theoreticalSample=</span><span class="dv">10000</span>, <span class="dt">empiricalSample=</span><span class="dv">10000</span>)
 endTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
 <span class="kw">print</span>(SPAGIndexFULL)</code></pre></div>
 <pre><code>##       categories     IDist     IOver         ICov       ISPAG
@@ -147,84 +150,83 @@ endTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
 ## LOU          LOU 0.5190096 0.2772326 0.0356745269 0.005133078
 ## LP            LP 0.4991059 0.3036286 0.0206077320 0.003122954
 ## ZZ            ZZ 0.0000000 1.0000000 0.0001012043 0.000000000
-##            Total 0.5919349 0.2396642 1.0000000000 0.141865581</code></pre>
+##            Total 0.5921323 0.2396642 1.0000000000 0.141912912</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(endTime-startTime)</code></pre></div>
-<pre><code>## Time difference of 17.32217 secs</code></pre>
+<pre><code>## Time difference of 23.12197 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">startTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
-SPAGIndexSAM &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>)
+SPAGIndexSAM &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>)
 endTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
 <span class="kw">print</span>(SPAGIndexSAM)</code></pre></div>
 <pre><code>##       categories     IDist     IOver         ICov       ISPAG
-## gimn.      gimn. 0.6123680 0.2970703 0.2537445603 0.046160277
-## SP            SP 0.6330665 0.3249807 0.4299286509 0.088451113
-## LO            LO 0.4991798 0.2305102 0.1515661370 0.017440115
-## T              T 0.5524071 0.2587197 0.0859857302 0.012288960
-## TU            TU 0.4950163 0.2843701 0.0223914584 0.003151998
-## LOU          LOU 0.5119381 0.2772326 0.0356745269 0.005063140
-## LP            LP 0.5059960 0.3036286 0.0206077320 0.003166066
+## gimn.      gimn. 0.5365399 0.2970703 0.2537445603 0.040444357
+## SP            SP 0.6221288 0.3249807 0.4299286509 0.086922910
+## LO            LO 0.5680939 0.2305102 0.1515661370 0.019847805
+## T              T 0.5825970 0.2587197 0.0859857302 0.012960571
+## TU            TU 0.4967183 0.2843701 0.0223914584 0.003162834
+## LOU          LOU 0.5280655 0.2772326 0.0356745269 0.005222642
+## LP            LP 0.4837534 0.3036286 0.0206077320 0.003026892
 ## ZZ            ZZ 0.0000000 1.0000000 0.0001012043 0.000000000
-##            Total 0.5835031 0.2396642 1.0000000000 0.139844800</code></pre>
+##            Total 0.5968321 0.2396642 1.0000000000 0.143039277</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(endTime-startTime)</code></pre></div>
-<pre><code>## Time difference of 12.64015 secs</code></pre>
-<p>Parameter numberOfSamples defines the number of times the distance index will be calculated. This increases the total time of calculations but results in more accurate result</p>
+<pre><code>## Time difference of 10.64706 secs</code></pre>
+<p>Parameter <strong>numberOfSamples</strong> defines the number of times the distance index will be calculated. This increases the total time of calculations but gives more accurate results:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">startTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
-SPAGIndexSAM &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>,
+SPAGIndexSAM &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>,
                      <span class="dt">numberOfSamples=</span><span class="dv">1</span>)
 endTime &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
 <span class="kw">print</span>(SPAGIndexSAM)</code></pre></div>
 <pre><code>##       categories     IDist     IOver         ICov       ISPAG
-## gimn.      gimn. 0.6615504 0.2970703 0.2537445603 0.049867643
-## SP            SP 0.6653856 0.3249807 0.4299286509 0.092966691
-## LO            LO 0.5490864 0.2305102 0.1515661370 0.019183727
-## T              T 0.5553445 0.2587197 0.0859857302 0.012354307
-## TU            TU 0.5069007 0.2843701 0.0223914584 0.003227671
-## LOU          LOU 0.4948226 0.2772326 0.0356745269 0.004893865
-## LP            LP 0.4992302 0.3036286 0.0206077320 0.003123732
+## gimn.      gimn. 0.6078705 0.2970703 0.2537445603 0.045821253
+## SP            SP 0.6449807 0.3249807 0.4299286509 0.090115742
+## LO            LO 0.5173356 0.2305102 0.1515661370 0.018074434
+## T              T 0.5599806 0.2587197 0.0859857302 0.012457442
+## TU            TU 0.5036867 0.2843701 0.0223914584 0.003207206
+## LOU          LOU 0.5119198 0.2772326 0.0356745269 0.005062959
+## LP            LP 0.4859942 0.3036286 0.0206077320 0.003040913
 ## ZZ            ZZ 0.0000000 1.0000000 0.0001012043 0.000000000
-##            Total 0.6316584 0.2396642 1.0000000000 0.151385894</code></pre>
+##            Total 0.5928389 0.2396642 1.0000000000 0.142082257</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(endTime-startTime)</code></pre></div>
-<pre><code>## Time difference of 8.184285 secs</code></pre>
+<pre><code>## Time difference of 10.09982 secs</code></pre>
 <p>The SPAG function also provides a method for calculating the SPAG Index with regards to regions, which simplifies the analysis:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>,
-                     <span class="dt">numberOfSamples=</span><span class="dv">1</span>, <span class="dt">eachArea =</span> <span class="ot">TRUE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">theoreticalSample=</span><span class="dv">100</span>, <span class="dt">empiricalSample=</span><span class="dv">100</span>, <span class="dt">numberOfSamples=</span><span class="dv">1</span>, <span class="dt">columnAreaName =</span> <span class="st">&quot;jpt_nazwa_&quot;</span>)
 SPAGIndex</code></pre></div>
 <pre><code>## $opolskie
 ##    categories     IDist     IOver       ICov     ISPAG
 ## T           T 0.0000000 1.0000000 0.05357143 0.0000000
 ## SP         SP 0.9812686 0.6592225 0.76190476 0.4928566
 ## LO         LO 1.1281465 0.9972413 0.18452381 0.2075956
-##         Total 1.1566110 0.6811710 1.00000000 0.7878499
+##         Total 1.0754879 0.6811710 1.00000000 0.7325912
 ## 
 ## $świętokrzyskie
 ##       categories     IDist     IOver      ICov      ISPAG
 ## SP            SP 1.0064571 0.6492655 0.8735632 0.57083675
 ## gimn.      gimn. 0.2435721 0.6410181 0.1264368 0.01974109
-##            Total 0.9575830 0.6696277 1.0000000 0.64122403
+##            Total 0.9009407 0.6696277 1.0000000 0.60329484
 ## 
 ## $`kujawsko-pomorskie`
 ##       categories     IDist     IOver        ICov       ISPAG
-## SP            SP 0.8842318 0.4368051 0.545394592 0.210651549
+## SP            SP 0.8581279 0.4368051 0.545394592 0.204432784
 ## gimn.      gimn. 0.8166840 0.4574637 0.274565839 0.102578706
 ## LO            LO 0.7812823 0.4533835 0.094526270 0.033483143
 ## LOU          LOU 0.7022585 0.7085368 0.007254342 0.003609586
 ## T              T 0.7538218 0.4836581 0.048142449 0.017552353
 ## TU            TU 0.7186703 0.5504587 0.023961310 0.009479054
 ## LP            LP 0.0000000 0.7871445 0.006155199 0.000000000
-##            Total 0.8014248 0.3499521 1.000000000 0.280460258
+##            Total 0.8453348 0.3499521 1.000000000 0.295826652
 ## 
 ## $mazowieckie
 ##       categories     IDist     IOver       ICov     ISPAG
 ## SP            SP 0.8470269 0.6315152 0.74180328 0.3967983
 ## LO            LO 0.0000000 1.0000000 0.03278689 0.0000000
 ## gimn.      gimn. 0.8123184 0.6086245 0.22540984 0.1114419
-##            Total 0.7990449 0.5895250 1.00000000 0.4710569
+##            Total 0.8199614 0.5895250 1.00000000 0.4833877
 ## 
 ## $pomorskie
 ##       categories     IDist     IOver      ICov      ISPAG
 ## SP            SP 0.9629636 0.6887267 0.6903553 0.45785664
 ## LO            LO 0.6877830 0.7173167 0.1497462 0.07387852
 ## gimn.      gimn. 1.3519685 0.6723342 0.1598985 0.14534367
-##            Total 0.9423472 0.6382168 1.0000000 0.60142183
+##            Total 0.9907606 0.6382168 1.0000000 0.63232004
 ## 
 ## $śląskie
 ##       categories     IDist     IOver       ICov      ISPAG
@@ -232,7 +234,7 @@ SPAGIndex</code></pre></div>
 ## gimn.      gimn. 1.0786231 0.8109250 0.14989293 0.13110871
 ## LO            LO 0.4310631 0.4780479 0.15417559 0.03177078
 ## T              T 0.0000000 1.0000000 0.03426124 0.00000000
-##            Total 0.8874685 0.6222435 1.00000000 0.55222151
+##            Total 0.8947450 0.6222435 1.00000000 0.55674924
 ## 
 ## $`warmińsko-mazurskie`
 ##       categories     IDist     IOver       ICov     ISPAG
@@ -241,40 +243,40 @@ SPAGIndex</code></pre></div>
 ## LO            LO 0.0000000 1.0000000 0.06792453 0.0000000
 ## T              T 0.0000000 1.0000000 0.04905660 0.0000000
 ## LP            LP 0.0000000 1.0000000 0.02264151 0.0000000
-##            Total 0.7381476 0.5749633 1.00000000 0.4244078
+##            Total 0.7313011 0.5749633 1.00000000 0.4204713
 ## 
 ## $zachodniopomorskie
 ##       categories     IDist     IOver       ICov       ISPAG
-## SP            SP 1.0874474 0.5425501 0.37770938 0.222846543
-## gimn.      gimn. 1.0591899 0.5111562 0.26651276 0.144293079
+## SP            SP 1.0230664 0.5425501 0.37770938 0.209653192
+## gimn.      gimn. 1.0125062 0.5111562 0.26651276 0.137933367
 ## LP            LP 0.9331462 0.6362541 0.01692959 0.010051404
-## T              T 0.9961112 0.4108064 0.10106451 0.041356493
-## LO            LO 1.0177647 0.3173893 0.18013338 0.058188061
+## T              T 1.0150608 0.4108064 0.10106451 0.042143240
+## LO            LO 0.9963048 0.3173893 0.18013338 0.056961147
 ## LOU          LOU 1.0504299 0.4747760 0.04354239 0.021715411
 ## TU            TU 0.9081733 0.5085407 0.01410799 0.006515677
-##            Total 1.0343797 0.3098985 1.00000000 0.320552658
+##            Total 1.0060193 0.3098985 1.00000000 0.311763836
 ## 
 ## $dolnośląskie
 ##       categories     IDist     IOver       ICov       ISPAG
-## gimn.      gimn. 0.8586715 0.4863359 0.24031694 0.100357027
-## SP            SP 0.9759664 0.5240936 0.40980574 0.209614724
-## LO            LO 0.8927202 0.3219075 0.16417970 0.047180866
-## T              T 0.9217954 0.4364742 0.09250694 0.037219237
+## gimn.      gimn. 0.8458461 0.4863359 0.24031694 0.098858060
+## SP            SP 0.9071312 0.5240936 0.40980574 0.194830546
+## LO            LO 0.8466386 0.3219075 0.16417970 0.044745420
+## T              T 0.9180702 0.4364742 0.09250694 0.037068825
 ## TU            TU 0.7892457 0.5087408 0.02409202 0.009673465
 ## LOU          LOU 0.9174018 0.4677199 0.04287495 0.018397090
 ## LP            LP 0.6994060 0.5016362 0.02622371 0.009200519
-##            Total 0.9559631 0.3140974 1.00000000 0.300265500
+##            Total 0.9345493 0.3140974 1.00000000 0.293539465
 ## 
 ## $wielkopolskie
 ##       categories     IDist     IOver       ICov       ISPAG
-## gimn.      gimn. 0.8506546 0.5155366 0.26203064 0.114911845
-## SP            SP 0.9464221 0.5403542 0.41845429 0.213998818
-## LO            LO 0.7863895 0.3067589 0.14760061 0.035605985
-## T              T 0.8398842 0.3951906 0.08846607 0.029363156
+## gimn.      gimn. 0.9437844 0.5155366 0.26203064 0.127492419
+## SP            SP 0.8737214 0.5403542 0.41845429 0.197560228
+## LO            LO 0.7980219 0.3067589 0.14760061 0.036132672
+## T              T 0.8920557 0.3951906 0.08846607 0.031187123
 ## LP            LP 0.8600099 0.5267257 0.02165348 0.009808794
 ## LOU          LOU 0.8380724 0.5074195 0.03414716 0.014521228
 ## TU            TU 0.8853217 0.4593946 0.02764775 0.011244673
-##            Total 0.9925949 0.3532183 1.00000000 0.350602643
+##            Total 0.8237049 0.3532183 1.00000000 0.290947613
 ## 
 ## $łódzkie
 ##       categories     IDist     IOver       ICov     ISPAG
@@ -286,45 +288,45 @@ SPAGIndex</code></pre></div>
 ## TU            TU 0.0000000 1.0000000 0.03488372 0.0000000
 ## T              T 0.0000000 1.0000000 0.02657807 0.0000000
 ## ZZ            ZZ 0.0000000 1.0000000 0.01328904 0.0000000
-##            Total 0.8153810 0.5152699 1.00000000 0.4201413
+##            Total 0.8295475 0.5152699 1.00000000 0.4274408
 ## 
 ## $podlaskie
 ##       categories    IDist     IOver      ICov     ISPAG
 ## SP            SP 0.922395 0.7772649 0.7945946 0.5696808
 ## gimn.      gimn. 0.000000 0.9129569 0.2054054 0.0000000
-##            Total 0.814349 0.6604366 1.0000000 0.5378259
+##            Total 0.799150 0.6604366 1.0000000 0.5277879
 ## 
 ## $małopolskie
 ##       categories     IDist     IOver      ICov      ISPAG
 ## gimn.      gimn. 0.3345828 0.4375057 0.3038961 0.04448488
 ## SP            SP 0.6306794 0.5235018 0.6961039 0.22982694
-##            Total 0.6453472 0.5243887 1.0000000 0.33841283
+##            Total 0.6378990 0.5243887 1.0000000 0.33450706
 ## 
 ## $lubuskie
 ##       categories     IDist     IOver      ICov     ISPAG
 ## SP            SP 0.9279048 0.8461246 0.7412935 0.5820067
 ## LO            LO 0.0000000 0.7777778 0.1343284 0.0000000
 ## gimn.      gimn. 0.0000000 0.9907219 0.1243781 0.0000000
-##            Total 1.1781712 0.7512939 1.0000000 0.8851528
+##            Total 1.1849733 0.7512939 1.0000000 0.8902632
 ## 
 ## $podkarpackie
 ##       categories     IDist     IOver       ICov     ISPAG
 ## gimn.      gimn. 0.8012166 0.7651638 0.27343750 0.1676341
 ## SP            SP 1.0226557 0.6818633 0.64453125 0.4494390
 ## T              T 0.0000000 1.0000000 0.08203125 0.0000000
-##            Total 0.9552538 0.6531531 1.00000000 0.6239270
+##            Total 0.8668091 0.6531531 1.00000000 0.5661591
 ## 
 ## $lubelskie
 ##       categories     IDist     IOver       ICov     ISPAG
 ## LO            LO 0.0000000 1.0000000 0.05800464 0.0000000
 ## SP            SP 0.9615494 0.6686373 0.68445476 0.4400550
 ## gimn.      gimn. 0.6852103 0.6129868 0.25754060 0.1081735
-##            Total 0.8664635 0.6068941 1.00000000 0.5258516</code></pre>
+##            Total 0.8685079 0.6068941 1.00000000 0.5270923</code></pre>
 </div>
 <div id="plotting-the-index" class="section level2">
 <h2>Plotting the Index</h2>
 <p>SPAG package allows plotting the index using innate plot functions as well as the <code>ggplot2</code> and <code>ggmap</code> packages. The first just prints out the map with circles:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland)
 <span class="kw">plot</span>(SPAGIndex)</code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAACVBMVEUAAACAgID////B0t2jAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAZH0lEQVR4nO2diXYjqQ6Ggfd/6DmpYtHyawGX0+5p69zbk1AgpM9ip5zSvuJK+dMGfLp8AQXyBRTIF1AgX0CBfAEF8gUUyBdQIF9AgXwBBfIFFMgXUCBfQIF8AQXyBRTIF1AgX0CB/DKgyuR36z6TXwTEkZQr4fdqP5VfAqQCppS/hNDbARmt6Qb0FyB6LyC7oyk/hGr7/Ch6JyDX9wtQDbP9cXkfoMDvq421zyf0LkAhnrvmmsn8R+VNgAKPyx0/M98HE3oPoMjfEUAz4z8FKDFHLq1H0Aqh5+14Rp4D9NNsSnIFMVpYG73Q58rDgJbnJan53wN0kylfQFIRBGRjmp3QUwa8SR4CVIoEdGkudiD9W4CKBlRCQHygR/IJm0aPACoa0Hpgluk/2ARqX8z+0d219wJyx7IVQ9D5kbxyPcRpT8kTgASfkqx/odQWLxYyCF/mVGtmKrusPK9pVSn45CqnwXZZPInc9teRDdl4tLNN8v8qoMoBZcelwl0f7g5sdWaLbASoKpb7USP/SZiZzAfL3p7IHigdQbCHuoEsHTiXlpqMqrk8Ttr5AqDRoFQPvd0H8dTGGqk9Dh7UQDfBk63zrHbZLXc2zwB6gYivSsVWal19UiuC0+0pR0MM9STdy6dMJb8Cw1I7M1sVWnxWCB04V2RHHOtIRZkcBWCmcG8vUdGojuDBoBL1YcXqs04USZoc6nwKEOxwHomgXpSYHOqIx34tNiH/eCHWXLpNP97zeFHxUwJC8IMvYixPBOEJIHuJ8SKgy/c+gXMCqB0AGlR5egqQNUVwxAbkmhxbQkNHBs1rEdQDR/iVmp0czRBOQihYbTMSTTermbJMdM+bWX0FtpSjgXDW7mYYpsl8Z4BQd9NMQHObjPsH2xT9TdUfxKAnMSAj40uAmqCAAM0al8srs1u5fjwAHcynExE0t5ieA7QoWSGEQikJCK9W+6LeKWjqc/Re0gFx/LudNAVi0GgqqQ0cPQJWcAUuwecBoIDe+pi0YlQ+P8zjRqQgaYQ85ecTKW2M+17t5vPqNrEYkPW58G1cnmgoE5qXx+akpxGMqoeeDHOTdMsTf1s0AuT0YFBpFlBRHPiPd9ul3bbqd+ZANhMDsSKIbLoio4O4dJ4jQi8D4mmqJY5GTwC9tuMBXSHPbfjEEEOeAwQmh91Mk9nUsnnDY7nmmJ0KyThwXwEkQ4hNhVbVOtcyjLOKfJF1u2Y/BQiluZN/qX9C0YBUZzzt4dGU3rUXVbtWpxbw4dhgHFK6GtmvNCKG140TcgFdffjJninlA08mchEUAtpIHRq5FdMa1NgooKZSVpIPyOC3CFQ7UyBhE3sR0NLPAXltTCWoJkaM7md3PT6YN8S3d11UONkyswHxuSJgJQDxMBNaiYn3FOf6l+VdRc9PNfz4caaedo0SEO9xVONCywwdQcpqAoic/Ra2JJgD4AunPuDTWeId8eQB8cGrif6552FE7jSWJGd4vaw8Pr+OZVeL6338XgPjRGxAwQnYBqCGRncCSEYLnR+Oh2oK3FuOGpiuEa/2oCnlfYCiA8IsoDb6zun8+nEGCwLEkVZZRcFGlDHgja3QH5h7LSwHKFTpLIxFRhA5nAX7FSRKQBOdZ2VleW3RT4tcCyDtCeZZQCYbGSw8nWS4AFWh8e5vRE3UvJ6nzOtBhrXqqQ/0Vp4JydcAgTmhRfA+QOOA7tTKk4pqG12qC+jBE1Wey6xSWoDhzA9PhIwG1EOotjpIqD34ocCq13Yje5uKOJ7s0sxsB4BGNjmjJhHU5m061OmOyZZRrTet3eKzdYMxD8hpRY0BogSXTWy8L3rhOjTZgHaDxPJ476ZSEpC+cjhtpn6p2Jn3JtfDZgIi/1mJzwAitxQ35+MWzCwguRMtYo1UMB+MAWzVRSLHBXRKiOxki4OjhM4sINzCaMtA8x9+rCvKUM3qLRcO+mZ6BGhc0IQH8L8FCLm8Iki3Ps5opNz1FqOqC9H2epX0OPNwkFgaAirW4JADBPgUtmxrvW2KAa7KIoXUAlmKlBQcMZjPvSYKKD7hfQmQpNNWOKzUQloPA9SK1NxGNxZJDo0IuBVC1FpXzS8AunmI8iNXrNh8GgNSo/kKoaAww2AsFgEgPI6NLpYCWumjZVW8VgsBNTyBcJ2s1XidAG3oMg/1g8u1LKBIRLY2+RS8TavHN5uCLmwCMt/KiCaIkPpPWhKQiA3hyNTOfFNZACCPDx3oxLrDAuTsLwdDIARkFnQAQT/Gv4ReU4CEj6FWBgg/YI4E+8shIGvR+wCghWm1rNaaO2QzQJZ2s25tdPTCE/UTchgepAjpbKCPluuHpV7t7M/s0nd3VF+zFgRo9xUdurhxrtCdAoIf7nSbDdxkQCjkGj5vZMwsqR9yY3nkVarM9unMQutXXsKSYG8G8MHrBeUyU6397A7yQQys3ANA45yxr9G39k9tQCYilQ2Ug2AaBDR+G8eAiBDSTRW5gPq+RZ8v+53P1LgAwU7WAZSMIOZpE0ZPVbXOm3Zk+QPctQAZ2BjdnVXr1Dk5ivpldp0GjqZQLaWR2V8TncqN/t5ZmBagoXyGHtetyEGqdMqVlDK75HJt9FYDgicJQOu1HtAk5j9j56V7OiIIO8udIPqnCWgt39rmMf0cPK7iJ2+GZgDNTQto9PypA6r9F6eFic+wLPQ0ralLE7c1R6es9EPblLAPGkcRlqvXYN56z1sbe2dAQiFLNOYE4ibCbzaNPSdJr396R8QHNLpdGTPT0XGaUytQJjsdUo7mQnTWA8qv7gIimvInYlxcQPRMQlMan8qKGeNARyRkAfWHpHs+eMN8dEK3OweEfEDdRkP0xpSyTrqOCOnRiYfdqq3Oje60FPWBbwq4okMesnWVRKWrYymjKDV2lRVewJFt/X4r398XlMN6YuNDJrkRxBuV6nVdQKMAVKcipsFsSPlrgKLMrwBav7cZ8cISdcuFUhIh6FqJCZlOpGVMRqwjr01A4muAhu0VNJI+kvLfB6Amow8ZMpOsTGdNTHjrL3DnzJsWUZmoOraiWDN2tAlQ5DWpNgvBM0FQfs3qQCayCYC9o6qMlWcbi1yrqW1GUJt3l1dbcVTzoKKAkIDyOUChmEG6dGVVobyqZ+yV3f9x7jZyeB1pA4BaBcaHgJru8ixDhsVWjniPluZV+sVzise7y8Qn82U2MRA8cCscAXJMtQNk1Ow1xXXpI5RwPyh0bWXTFzpk+RGGYI0MAAGvaH7HlBacvT8LiHwpmQ/o7rGcqfdwHNnHAKGxqmYBjUFTT6+4OrM8r1Zp1wnLaQdQVefwJh/YB8xOww6gLCCc5wxQbsu1JgDdLqUBqZoLq1oDOlhHuYByTQx1BjBbJZ0E1lRm03DhTCXyJD0A5PJJTR1PAKFarflVBEh+4VIEaMQR6di1LSvJ55OaW28QH/bB8dbInQIUwQEmZj3PnO6kHwT1tnFGA5U6VrgjJ2OBQqlPG4e6ZQmvhlRYSC6nahuQdc58qfSccepzALmBHEfQoteoU9eOrbR+9Pozk1e11QfhoJ+AbJ3+x2EVMo0Dq3C3N+LFrs+ZbV0uvfOXs+1kH5CNIbhutVmKAUoO84196EaGdWeHr2I2NjxwE2sBoODDeAEQOzmzWQENIEehjQ2sgzMCM4YRFG07GulmE+slcsO8cC4F8ed3BSgNyRHoUtiYrWE+6oOq//Im977MxpMBJBdVd9K7AEWljIliXJt938Vm4D8dFsmtuJIAlAGIb8RGpU4B7YTQpODyI9dh9SmRt9vR3cgQUtPB2FGriYUFN2ZCeYLTjbj66UDfhkq+zMrXhIl6XgG0Fz8xnjL/PtkGJANQsWPuPgtqLdPAXgH0LJ0upN49QNITB9ClvF8AS+g3FGQMe4MwH0aCu1Ra3T9Kd8olg3RvmHfmww+JnAFVtd2mZ03u/NByG++Vey4LgZtHcvHdzXuwN1KARm9BTwhEHgQpDKAfz18C1PplD66Wr76JcbtDPpZGXg0SLOqcBOj7BCSnImXtzfUv5vHpNA+QPu8r1Djm1jN4bjfn9pIANOu1LlyMXzUfAOj+9BOj5R6gBgEN+zy/03wWbSOChM2HgOgO3tF+UL/LIDOvJPU3j1wGmV69znxja4e5VtcNOAVo2gVm1AgQg3IMCGSmVe0BIv+G+fDKwfCjMACABgSU0dyLm0+ibe4tQBRTlMNwynBEZHWb05pBC0UOIq+JGSNrf6x8e6Gfnm1qTfwMo4AHGxsh/T4VwHEAiA4ccCr2htVq5Ou4qBxkw0WvNZ7VKdsbYJ7OkQcDEp//C1LreGUmcrJXHORDjgTvUp0AqsbUY2U4ihEMKOV07ebIYczzYFxTXGt4T7cWDxAxIQ3oKLLSd1NAE7N3gtZLinrCgnLj9AQgiw/qlVfizuJD3FXz3MA2wKz86MjTKrMz/bExNqAGGLHJ/zYgt67RZoABOCvN5GhV2Zl+p8zU7uQyAI0JX06aP6OgbqhBiNRme/wWQOxjNXNZLneTs4CoutAPRQi2MwYo3LHenwdl76wV/adWyVZFDlC6iU3buPd8n6HPHbciaH8mnT9YqPIlPLKgyjeytCvavFEnS9i9w7cPaEO553UcPcYsyOckepgmAqjsvtR7EEGxUnLSx9YdjY69megxruKDCpc/VT6SgPY+44MIis9kV5SIhdnoFEtqKtTQenMR5onqJ8OwlttPXfKGTvre4Ro3YvmVvI4pEz7YAARoJSF6sugWn5PtjgQgJygybGZmqFyHFQdke3RRf6gHemHDzAW0gwczAqkT0FWDA+jyai+AHDedUm4Vz+wGtabuAw3DzD7oLukctt5Oeaex4ie3R7MfBZcbpauX1ft8rJUMANTNuioKT6OdXmWpLs4G78hiPvEbGXZ4E1DXJA+62H+1VTcgx+zgBbpfA7QgnW4pdgsKBOS9BOAYdu8des9/C1ATfh4DUhuEw2rLrAhQ8GXblEefxzlf0Jztg4r8mIWf9w8ngID5wYo+eB4OYLK4W2FiP2goIU+0p5toLjEPAoOFWATI357HBezKcqVGfPSDNxUuLwMqNOwDALkdEf85V3F0cMiKdTzjS/vuqHHbFQ6qxv+zzKCAzjdvaCb3qarjCBCN1elhne8jGgfunEEyhBiuRAvyM1CPMW4N6OTgkFQ0v7XiNs8LmI3+yABE/cA2KW908QmoIfJ2fqXZSOfG3H8r7a6rzuM7FTV5+YlDqw8KU9kp0TTGcJh2+VidUspNMEuQgmvU6pWkILjL2dyXjha0qmdd45pkiCyra3g7oEo35fOLeH/DLDcMz60lw5XhvZwZ0Cxuw4JFuAmhkT8ll/94bOqbDBEzXsQT5pQ94EwwMhN+vdqu1v7IEoBmNcBL8glbKM74rIWsC6hNQNLqcYqviqPaHZNyERR4vz9NDOrsWbpuaU/mGG0YTXg42wQvAWpoVH9VgirL3PVXOa9Bg2bENmtAQ9nzgLCHOzR0UrgQKBagpu8vAOkXZdRpWbMBHfdBKUDbA39YZTdO9b3jJl0w4dY3idxai7nNfwpoS+DMOyFqXT+2Cvts3imqvS3Rq52ngF7ncwyI+DNu001vKn8mnUWAynhpAldm3MNO2PiUiO/72JGqN5rL+EtCEBCognxSViXI/8i05/CsCTn7/o5Zj2sGjIhqnnBYf9DWANST4EV116z2ICCiq59Z08tQhkPTYcRgnHqDp+Zf/IWAZl+HWqZjFdH4BB/G6jaHLiqPzg/6OKccc/4kMgRkHzY+AyiRCw/xk9C1XWlbYQK6+93roINSsr+HWlrQ05rVxn4vgoBhty/3fsH1P9MKcxNxVTBeZK7yJVedXycOnmArzrRJWfAaH2cKMvYLunnqTKJ7bho4vK7jTQznVAN/TCvxTwHqnmCr6OymQkA1BWiVtI8O1eSca9oGtH8fwQZ066O7M9OvVSF9tWImufuPpW9GNabJ67TMRwW0sXhRVMsDlJgR62dkU29nJME/CZxVUN1uwDmKdMEYUPfvJTwQkGXS7eBKlcB0Ux3/zwByPG0ohHxA5ONfH9MRImIGqxxFtciIb7SWokG9CKiguZALiHp3SEb7IfRLAGX6X8egpku11wAhm6zZdBrQOSG3AuULAdSX8LAQHK9J0j6gyUK96OAqWnZUvlx4BNBtj6jz3m0dSwhvRuMkuZuOEG7DhfOAWqtHgLwKgCf9kyxjfS3HL09jIRMuFxAay+Zcmle5sy9TE19xuw9I2SmKaEDuTI+NjcbswLNqbxSTZfcBRfvrqAsOAPlT4ZGj6m8ekhmxQTKrmROUBW8dRHwSOoPnuAlC6YD65MEYBAORn88OoCEb3wScOaABNjqP49frRcX7gJj+E0DZrrodRVBhJvovPtmwXgBUXwd01ZsiFFlnnD6QmfdEJGN/5DUUqx+SIpvwZwGaU635+2wtkIXZYx8H0DNNbOlyMYW9BRrDG203h4Bou9y9ESz7hVcAxVEU28an9RLCndB3HIGtxpA2CozfNhHllxqxpnkCDPFkLGOz1gWhx1JrvRMqCt5tPQrScXFhra02ET0GiOpBTYxnyFhTBKCriU39qFZDo4i4AQkXkOXfAWi0tmbysXyxtoPGrLh3QXlLKwDU68qpea4PGjpKk4sQPSGFppnRT7NX3qW4drQ2+3QZs/PsJJSnAV3djWpd4mwTm+ZuNJNsBkius3foFT27tfwZQAUBquqP3wDL/OMrmVPnVjW4a+N7RMleylxaw/yBoN55vE6ffhNEa2VF53GX2p3ld+z8d5eyLXVjyzUjGFBXvbSjy11Vn++NTOO/InIkIGZ/cV9FTA/1O3vSGfEiSEyJpf14IUYf94NWUkQYT7O70ZHH88KGGRQQPfeWJ/tqtf6A1+sDgh2zbmP4iS5XZ7WsCAtPVONDnbTqoxv/MMroMGgTWs9hDw5rszCEETKmm7QIQ2JoeGYeBAFxAr3DKGuGvB6XIggVazxS3fRITWw8VT7zGDciRlFDw0Mz6VL4kQexamUpAhD8nr353AAkqu1NNdfFkHqW/qrCnZfJKE7ImN/PTnok0ybeyIZGAKgW2iCslXkZdx2TgK5bWmIAqcHtmozijFQWQo1xUfO8Mj96+msPse4JmQxRgHRIWwMX2rjVNs5vsh9vT07TbcCPARozeQVozmXYvoZcFkxAd8J4R5Y977U0+0c2rwA2Eo1irW+69RwgtmBFNbJBrRXKrAPiu0ELG4sgNOpMQGI/yRQ+xfQa6IOA6F+njQDBTliMMWW9E1XWrtw87qLl177+CkLXVD6SuDldPXtyD6PWmCunZK6m1aF3PBPQGK+5ggmIrm68ICKE/P79+Qiy6NAeI5zV8WCjETQSGyWw5sklCWj2QpEtTwOyTnqq+FkN4PQ536dmzcYF1MTq3kM0AZk5Zp3PCViQDmFrcrZqVwX0ZHC4yrtWUpgOh2Ty5AJqbCrm5XtQiv1NRRYgbQHaFlttTDwZylfi/IyiCLpmGubzpe9JcZv9ml2vtkBjYi6slrIVZnjexwGNpUxRz6GtLe6A2tOAfJnbgpU2sWlJGdsky7TSm60FqAlAhQGi80LoZ2aB8quAxgwG2lXGvSeWQBsYKDJ76V6ANrEEoITRvwlo7FCN9SK3uwMSCWPqKbwVHvNpwfp5LubmPMooZcuvAhrR0+d6AlCTgBqLIApIxpS1VSEiiJfKbcL+LqAlANA9TWZ/jL5vQt6AyGxaAUo6S6dP2TKpXO+Q/gfF9KAuf+cRpHriS3L3Eybvq0jSzFy2N8jskGii7pB7FPEsqNfNACKbBNljjj8H6BZx6aLIK4I9sQfP+hfryYgaDILs2YzvErZub9f7uWB78P7XmfelHe6V/X2AxoBV7a8ZcQElQ2ivh26fAOgOnPHiKf949TDnacpU19+ay9v3xwGtYWnNbyxAweWEXG1bPdCnALp/mGPYbC88ZtwAyg5KVz+3Y95G3vcInCHXtfx0CtLfshHU8n/vrRf408KDRK7P3YJispirbY/PBwDilxzkppAtqs/O+r3F5xMAoTE60WD0ciNZWdqsu5q97G8TZba6yIQWaW4Jo6K/HND0OgPI0JGqKCsfCAj3QgCQVJHxfZfP5wASZ6Pozi//XZme4vP3A1rHDfJ4rInfTzY8tvl8DKBh+j2RuzdmD1V4Of5mQHNnaAz6294kLiru2/UxgNo0v4rf8+VjQH9xBLXfAPQXd9I/Mk5e5+877tR1pBTXsSEfBei6k0ddgO70Hpzcxavjqqu6LaoL7xr1WYCkd9pbBmMkzbBD1/NEHbtGfRIgJPKFoLq+840REqXMMNruhD4dEPvMQXwZ2/X2l03+nwGpC9/y+rVZMkp05C8ChK8We/0N+l73/yGgOVq5T/FDvSny/wV0MAtu9XTbccnHA5rj1QGfn79+ebhxPeXzAbU+KzwDpFrY/66J5VYQXmkx8G1q+HhAQ84AKbL/X0DnwqJoOxL/AUBivbJJ6J8AxNfBf93R8y8JIbRT7N8B9CM1WL0B+bcAOat8S/4xQD+yR+gfBLQnX0CBfAEF8gUUyBdQIF9AgXwBBfIFFMgXUCBfQIF8AQXyBRTIF1AgX0CBfAEF8gUUyBdQIF9AgfwHplwJSS/QCCIAAAAASUVORK5CYII=" /><!-- --></p>
 <p>The ggplot function used on an object of class SPAG returns a a ggplot object that can be plotted or modified:</p>
@@ -349,7 +351,7 @@ SPAGIndex</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ggSPAG +<span class="st"> </span><span class="kw">coord_map</span>(<span class="st">&quot;conic&quot;</span>, <span class="dt">lat=</span><span class="dv">20</span>) +<span class="st"> </span><span class="kw">coord_flip</span>()</code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Instead of manipulating with the map after calculating the SPAG Index it is possible to change the coordinates of the map and companies before the calculation. This functionality is provided with the parameter CRSProjection:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> ShapefilePoland, <span class="dt">CRSProjection=</span><span class="st">&quot;+proj=longlat +datum=WGS84&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SPAGIndex &lt;-<span class="st"> </span><span class="kw">SPAG</span>(<span class="dt">companiesDF =</span> CompaniesPoland, <span class="dt">shp =</span> MapPoland, <span class="dt">CRSProjection=</span><span class="st">&quot;+proj=longlat +datum=WGS84&quot;</span>)
 <span class="kw">ggplot</span>(SPAGIndex)</code></pre></div>
 <pre><code>## Regions defined for each Polygons</code></pre>
 <p><img src="data:image/png;base64,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" /><!-- --></p>

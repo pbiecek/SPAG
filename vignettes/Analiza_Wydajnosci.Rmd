@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Zarys
 
-W skypcie **Distance_Index2** przeprowadzona zosta³a analiza dotycz¹ca jakoœci otrzymywanych wyników w zale¿noœci od rozmiaru próbki dla ró¿nych typów danych wejœciowych. Wnioskiem z tamtej analizy by³ fakt, ¿e niezale¿nie od sposobu rozproszenia danych wejœciowych œrednia wartoœæ otrzymywanego *Indeksu Distance* by³a bardzo bliska wartoœci rzeczywistej. Naturaln¹ kontynuacj¹ owej analizy jest odpowiedŸ na pytanie - czy bardziej op³acalne jest wielokrotne liczenie indeksu na niewielkiej próbce, czy zwiêkszenie rozmiaru próbki kosztem liczby powtórzeñ.
+W skypcie **Distance_Index2** przeprowadzona zosta³a analiza dotycz¹ca jakoœci otrzymywanych wyników w zale¿noœci od rozmiaru próbki dla ró¿nych typów danych wejœciowych. Wnioskiem z analizy by³ fakt, ¿e niezale¿nie od sposobu rozproszenia danych wejœciowych œrednia wartoœæ otrzymywanego *Indeksu Distance* by³a bardzo bliska wartoœci rzeczywistej. Naturaln¹ kontynuacj¹ owej analizy jest odpowiedŸ na pytanie - czy bardziej op³acalne jest wielokrotne liczenie indeksu na niewielkiej próbce, czy zwiêkszenie rozmiaru próbki kosztem liczby powtórzeñ.
 
-W celu odpowiedzenia na to pytanie przeprowadzona zosta³a poni¿sza analiza. W celu przyœpieszenia testów zmodyfikowana zosta³a funkcja do wyznaczania indeksu distance. Wartoœæ rozk³adu teoretycznego jest wyliczana raz dla ka¿dego zboru danych, a nastêpnie przekazywana funkcji jako argument:
+W celu odpowiedzenia na to pytanie przeprowadzona zosta³a poni¿sza analiza. W celu przyœpieszenia testów zmodyfikowana zosta³a funkcja do wyznaczania indeksu distance. Wartoœæ rozk³adu teoretycznego jest wyliczana raz dla ka¿dego zboru danych, a nastêpnie przekazywana do funkcji jako argument:
 
 ```{r cars}
 IDistFULL <- vector(mode="numeric", length=0)
@@ -30,7 +30,7 @@ calcDistanceIndexTest <- function(coordsCategoryDF, region, theoreticalSample, e
 
 ```
 
-# Zbiory Testowe.
+# Zbiory Testowe
 
 W analizie wykorzystane zosta³y zbiory przygotwane w skrypcie  **Distance_Index2**, tzn. zbiory o licznoœci 5000-20000 punktów o ró¿nym skupieniu i rozproszeniu. Ich dok³adny opis znajduje siê we wspomnianym skrypcie.
 
@@ -100,7 +100,7 @@ CompaniesList <- list(TestCompanies4,
 
 ## Testy
 
-W celu wyznaczenia optymalnego stosunki liczebnoœci próbki/iloœci próbkowañ ustawi³em czas próbkowania na 30 sekund. W tym czasie dla ka¿dego zbioru i dla ka¿dej licznoœci próbkowania wykonywana by³a maksymalna iloœæ próbkowania, a nastêpnie wynik by³ uœredniany. Taka œrednia by³a nastêpnie traktowana jako jedna obserwacja. Dla ka¿dej liczebnoœci próbkowania zebra³em 90 obserwacji, które by³y nastêpnie analizowane.
+W celu wyznaczenia optymalnego stosunku liczebnoœci próbki/liczby próbkowañ, ustawi³em czas próbkowania na 30 sekund. W tym czasie dla ka¿dego zbioru i dla ka¿dej licznoœci próbkowania wykonywana by³a maksymalna liczba próbkowania, a nastêpnie wynik by³ uœredniany. Taka œrednia by³a nastêpnie traktowana jako jedna obserwacja. Dla ka¿dej liczebnoœci próbkowania zebra³em 90 obserwacji, które by³y nastêpnie analizowane.
 
 Czas próbkowania zosta³ ustawiony na 30 sekund, gdy¿ wówczas ca³kowite wyliczenie indeksu SPAG nie powinno przekroczyæ jednej minuty.
 

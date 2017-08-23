@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // avgDist
 double avgDist(NumericMatrix pointMatrix);
-RcppExport SEXP SPAG_avgDist(SEXP pointMatrixSEXP) {
+RcppExport SEXP _SPAG_avgDist(SEXP pointMatrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -15,4 +15,14 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(avgDist(pointMatrix));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_SPAG_avgDist", (DL_FUNC) &_SPAG_avgDist, 1},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_SPAG(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -5,8 +5,8 @@
 \title{Function calculating the coverage, distance and overlap components of the SPAG Index.}
 \usage{
 SPAG(companiesDF, shp, theoreticalSample = 1000, empiricalSample = 1000,
-  numberOfSamples = 1, eachArea = FALSE, columnAreaName,
-  companiesProjection, CRSProjection, totalOnly = FALSE)
+  numberOfSamples = 1, columnAreaName, companiesProjection, CRSProjection,
+  totalOnly = FALSE)
 }
 \arguments{
 \item{companiesDF}{- data frame with information regarding the companies. The data frame needs four columns:
@@ -20,6 +20,8 @@ uniform distribution.}
 
 \item{empiricalSample}{- number of companies used for the estimation of the average distance between companeis for which
 the distance index is being calculated.}
+
+\item{numberOfSamples}{-}
 }
 \description{
 Function calculating the coverage, distance and overlap components of the SPAG Index.
@@ -36,4 +38,3 @@ plot(spagIndex, category = "A") + coord_map("orthographic")
 plot(spagIndex, category = "B")
 plot(spagIndex, category = "C")
 }
-
