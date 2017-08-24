@@ -18,4 +18,6 @@ Work in progress:
 * [Cheatsheet](https://github.com/pbiecek/SPAG/blob/master/vignettes/SPAGCheatSheet.pdf)
 * [Distance Index](https://rawgit.com/pbiecek/SPAG/master/vignettes/Distance_Index.html)
 * [Sampling](https://rawgit.com/pbiecek/SPAG/master/vignettes/UniformCompanyDistribution.html)
+* [Distribution](https://rawgit.com/pbiecek/SPAG/master/vignettes/Analiza_Rozkladu.html)
+* [Performance](https://rawgit.com/pbiecek/SPAG/master/vignettes/Analiza_Wydajnosci.html)
 
