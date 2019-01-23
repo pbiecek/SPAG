@@ -27,8 +27,8 @@ NULL
 #'
 #' @examples
 #' data(CompaniesPoland)
-#' data(ShapefilePoland)
-#' spagIndex <- SPAG(CompaniesPoland,shp = ShapefilePoland)
+#' data(MapPoland)
+#' spagIndex <- SPAG(CompaniesPoland,shp = MapPoland)
 #' print(spagIndex)
 #' plot(spagIndex)
 #' plot(spagIndex, addCompanies = FALSE)
@@ -39,12 +39,15 @@ NULL
 #' @export
 
 SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, columnAreaName, 
-                 companiesProjection, CRSProjection, totalOnly=FALSE){
+                 companiesProjection, CRSProjection, totalOnly=FALSE, theoreticalDistributionType="regular"){
   
   currentWarning <- getOption("warn")
   options(warn = -1)
   
-
+  if(! theoreticalDistributionType %in% c("stratified", "nonaligned", "hexagonal", "clustered", "regular")){
+    stop("Wrong theoreticalDistributionType provided.")
+  }
+  
   if(!missing(companiesProjection)){
     companySpatialPoints <- SpatialPoints(companiesDF[,c(1,2)], proj4string=companiesProjection)
   } else{
@@ -64,7 +67,7 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
   }
   
   if(missing(columnAreaName)){
-    result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection, totalOnly)
+    result <- SPAGSingle(companiesDF, shp, theoreticalSample, empiricalSample, numberOfSamples, CRSProjection, totalOnly, theoreticalDistributionType)
     return(result)
   } else {
     
@@ -86,7 +89,7 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
       if(nrow(daneTestowe)){
       shpTest <- SpatialPolygonsDataFrame(SpatialPolygons(list(shp@polygons[[i]]),proj4string = CRSProjection),shp@data[i,])
       finalList[[as.character(regionNames[i])]] <- SPAGSingle(daneTestowe,shpTest,theoreticalSample, empiricalSample,
-                                                              numberOfSamples, CRSProjection, totalOnly)
+                                                              numberOfSamples, CRSProjection, totalOnly, theoreticalDistributionType)
       }
     }
     
@@ -97,7 +100,7 @@ SPAG <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000,
 
 
 SPAGSingle <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample=1000, numberOfSamples=1, CRSProjection,
-                       totalOnly){
+                       totalOnly, theoreticalDistributionType){
   
   # Calculating the coverage part of SPAG index:
   
@@ -144,7 +147,7 @@ SPAGSingle <- function(companiesDF, shp, theoreticalSample=1000, empiricalSample
   # Calculating the indexes
   IOver <- calcOverlapIndex(circles, companiesDF, categories, CirclesUnionCategoryArea, CirclesUnionTotalArea, totalOnly)
   ICov <- calcCoverageIndex(companiesDF[,c(3, 4)], categories, totalOnly)
-  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], shp, categories,theoreticalSample, empiricalSample, numberOfSamples, totalOnly)
+  IDist <- calcDistanceIndex(companiesDF[,c(1, 2, 4)], shp, categories,theoreticalSample, empiricalSample, numberOfSamples, totalOnly, theoreticalDistributionType)
   ISPAG = IDist*IOver*ICov
   
   if(!totalOnly){
@@ -176,7 +179,7 @@ calcCoverageIndex <- function(employmentCategoryDF, categories, totalOnly){
 }
 
 calcDistanceIndex <- function(coordsCategoryDF, region, categories,theoreticalSample, empiricalSample, numberOfSamples, 
-                              totalOnly){
+                              totalOnly, theoreticalDistributionType){
   
   IDistFULL <- vector(mode="numeric", length=0)
   

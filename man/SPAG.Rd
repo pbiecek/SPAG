@@ -6,7 +6,7 @@
 \usage{
 SPAG(companiesDF, shp, theoreticalSample = 1000, empiricalSample = 1000,
   numberOfSamples = 1, columnAreaName, companiesProjection, CRSProjection,
-  totalOnly = FALSE)
+  totalOnly = FALSE, theoreticalDistributionType = "regular")
 }
 \arguments{
 \item{companiesDF}{- data frame with information regarding the companies. The data frame needs four columns:
@@ -28,8 +28,8 @@ Function calculating the coverage, distance and overlap components of the SPAG I
 }
 \examples{
 data(CompaniesPoland)
-data(ShapefilePoland)
-spagIndex <- SPAG(CompaniesPoland,shp = ShapefilePoland)
+data(MapPoland)
+spagIndex <- SPAG(CompaniesPoland,shp = MapPoland)
 print(spagIndex)
 plot(spagIndex)
 plot(spagIndex, addCompanies = FALSE)
